@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Linea Mini Water Lab</title>
+<title>Espresso Machine Water Profile</title>
 <meta name="description" content="DIY espresso water calculator for La Marzocco machines — Epsom salt + baking soda dosing within La Marzocco's water spec.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -124,6 +124,29 @@
   .conc-note { font-size: 0.8rem; color: var(--muted); margin-top: 16px; }
   .conc-note b { color: var(--ink-2); }
 
+  /* ---- share ---- */
+  .share-row {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    margin-top: 18px; padding-top: 16px; border-top: 2px solid var(--hairline);
+  }
+  .share-btn {
+    font-family: inherit; font-size: 0.75rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap;
+    padding: 9px 14px; cursor: pointer;
+    background: var(--accent); color: #fff;
+    border: 2px solid var(--line); box-shadow: 3px 3px 0 var(--shadow);
+    transition: transform 80ms ease, box-shadow 80ms ease, background 120ms ease;
+  }
+  .share-btn:hover { transform: translate(1px, 1px); box-shadow: 2px 2px 0 var(--shadow); }
+  .share-btn:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--shadow); }
+  .share-btn.copied { background: var(--good); }
+  @media (prefers-reduced-motion: reduce) {
+    .share-btn { transition: none; }
+    .share-btn:hover, .share-btn:active { transform: none; }
+  }
+  .share-note { font-size: 0.8rem; color: var(--muted); flex: 1 1 240px; min-width: 0; }
+  .share-note b { color: var(--ink-2); }
+
   /* ---- spec table ---- */
   .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   table { width: 100%; min-width: 460px; border-collapse: collapse; font-size: 0.9rem; }
@@ -164,7 +187,7 @@
 <main>
   <header>
     <span class="kicker">La Marzocco Linea Mini</span>
-    <h1>Water <span class="accent">Lab</span></h1>
+    <h1>Espresso Machine Water <span class="accent">Profile</span></h1>
     <p class="sub">Chloride-free espresso water from distilled + Epsom salt + baking soda, dosed inside
       <a href="https://lamarzoccousa.com/wp-content/uploads/2023/09/Water-Specifications.pdf">La Marzocco's water spec</a>.
       Slide the targets; the salts recalculate.</p>
@@ -213,6 +236,10 @@
       </div>
     </div>
     <p class="conc-note"><b>Concentrates</b> (accuracy fix for 0.1 g scales): A = 35.0 g Epsom in 500 mL distilled (70 mg/mL) · B = 15.0 g baking soda in 500 mL distilled (30 mg/mL). Keep them in separate bottles — mixed concentrate slowly precipitates magnesium carbonate. Dissolve Epsom first, then baking soda.</p>
+    <div class="share-row">
+      <button type="button" class="share-btn" id="shareBtn">Copy share link</button>
+      <p class="share-note" id="shareNote"></p>
+    </div>
   </section>
 
   <section class="card">
@@ -332,9 +359,105 @@
     const th = tercile(H), ta = tercile(A);
     $('profileName').textContent = PROFILE_NAMES[th][ta];
     $('profileDesc').textContent = HARDNESS_DESC[th] + ' ' + ALK_DESC[ta];
+
+    syncUrl();
+    $('shareNote').innerHTML =
+      'This page’s link now encodes <b>' + PROFILE_NAMES[th][ta] + '</b> — ' +
+      '<b>' + epsomG.toFixed(2) + ' g</b> Epsom + <b>' + sodaG.toFixed(2) + ' g</b> baking soda ' +
+      'per <b>' + gal + ' gal</b>. Copy it to share this profile or save it as a note.';
   }
 
+  /* ---------- shareable profiles via ?hardness=&alkalinity=&batch= ----------
+     The three sliders fully determine everything else on the page, so they're
+     the whole shareable payload. A param equal to the slider's default is
+     omitted, which keeps a stock link clean and makes a bare URL mean
+     "house profile". */
+  const FIELDS = [
+    { id: 'hardness',   min: 70,  max: 100, step: 1,   def: 75 },
+    { id: 'alkalinity', min: 40,  max: 80,  step: 1,   def: 47 },
+    { id: 'batch',      min: 0.5, max: 6,   step: 0.5, def: 1  },
+  ];
+
+  // Snap to the slider's own grid so a hand-typed ?hardness=83.7 still lands on
+  // a value the slider can actually represent. Anything unparseable -> null,
+  // which falls back to the default rather than rendering NaN.
+  function readParam(params, f) {
+    const raw = params.get(f.id);
+    if (raw === null || raw.trim() === '') return null;
+    const n = Number(raw);
+    if (!Number.isFinite(n)) return null;
+    const clamped = Math.min(f.max, Math.max(f.min, n));
+    const snapped = Math.round((clamped - f.min) / f.step) * f.step + f.min;
+    return +snapped.toFixed(4);
+  }
+
+  function applyUrl() {
+    const params = new URLSearchParams(window.location.search);
+    FIELDS.forEach(f => {
+      const v = readParam(params, f);
+      $(f.id).value = v === null ? f.def : v;
+    });
+  }
+
+  function syncUrl() {
+    const url = new URL(window.location.href);
+    FIELDS.forEach(f => {
+      const v = +$(f.id).value;
+      if (v === f.def) url.searchParams.delete(f.id);
+      else url.searchParams.set(f.id, String(v));
+    });
+    const next = url.pathname + url.search + url.hash;
+    const current = location.pathname + location.search + location.hash;
+    if (next === current) return;
+    // replaceState, not pushState: dragging a slider fires input continuously and
+    // would otherwise bury the user's previous page under dozens of history entries.
+    history.replaceState(null, '', next);
+    resetShareBtn();
+  }
+
+  let copiedTimer = null;
+  function resetShareBtn() {
+    const btn = $('shareBtn');
+    if (copiedTimer) { clearTimeout(copiedTimer); copiedTimer = null; }
+    btn.classList.remove('copied');
+    btn.textContent = 'Copy share link';
+  }
+
+  function flashShareBtn(text) {
+    const btn = $('shareBtn');
+    if (copiedTimer) clearTimeout(copiedTimer);
+    btn.classList.add('copied');
+    btn.textContent = text;
+    copiedTimer = setTimeout(resetShareBtn, 2000);
+  }
+
+  async function copyShareLink() {
+    const link = location.href;
+    try {
+      await navigator.clipboard.writeText(link);
+      flashShareBtn('Copied ✓');
+      return;
+    } catch (e) { /* not available on http:// or without permission — fall through */ }
+    const ta = document.createElement('textarea');
+    ta.value = link;
+    ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+    document.body.appendChild(ta);
+    ta.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    document.body.removeChild(ta);
+    flashShareBtn(ok ? 'Copied ✓' : 'Press ⌘C');
+  }
+
+  $('shareBtn').addEventListener('click', copyShareLink);
+
+  // Back/forward re-reads the URL, so the URL stays the source of truth on
+  // navigation even though state lives in the inputs the rest of the time.
+  window.addEventListener('popstate', () => { applyUrl(); render(); });
+
   ['hardness', 'alkalinity', 'batch'].forEach(id => $(id).addEventListener('input', render));
+  applyUrl();
   render();
 })();
 </script>
