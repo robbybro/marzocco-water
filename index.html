@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Espresso Machine Water Profile</title>
-<meta name="description" content="DIY espresso water calculator for La Marzocco machines — Epsom salt + baking soda dosing within La Marzocco's water spec.">
+<meta name="description" content="DIY coffee water calculator — espresso water inside La Marzocco's spec, and pourover water built up from Seattle tap, both from Epsom salt + baking soda.">
 <!-- Link preview card. Static: query params can't vary these on GitHub Pages,
      since every ?hardness=… serves this same file and crawlers don't run JS. -->
 <meta property="og:type" content="website">
@@ -90,6 +90,22 @@
   h1 .accent { color: var(--accent); }
   .sub { color: var(--ink-2); font-size: 0.95rem; margin-top: 10px; max-width: 56ch; }
   .sub a { color: var(--accent); font-weight: 500; text-decoration: none; border-bottom: 2px solid var(--accent); }
+
+  /* ---- tabs ---- */
+  .tabs {
+    display: flex; margin-bottom: clamp(20px, 4vw, 32px);
+    border: 2px solid var(--line); box-shadow: 5px 5px 0 var(--shadow); background: var(--surface);
+  }
+  .tab {
+    flex: 1 1 0; min-width: 0; font-family: inherit; font-size: 0.8rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    padding: 13px 10px; cursor: pointer;
+    background: transparent; color: var(--ink-2); border: 0; border-radius: 0;
+  }
+  .tab + .tab { border-left: 2px solid var(--line); }
+  .tab[aria-selected="true"] { background: var(--accent); color: #fff; }
+  .tab:focus-visible { outline: 3px solid var(--ink); outline-offset: -5px; }
+  [hidden] { display: none !important; }
 
   .card {
     background: var(--surface);
@@ -201,6 +217,87 @@
   .meter-fill { height: 100%; background: var(--accent); transition: width 120ms ease; }
   .meter-fill.risk { background: var(--bad); }
 
+  /* ---- pourover: pickers ---- */
+  :root { --c-target: #e9520a; --c-tap: #1d6fb8; }
+  @media (prefers-color-scheme: dark) { :root { --c-target: #f06020; --c-tap: #3d95da; } }
+  .pick { margin-bottom: 20px; }
+  .pick-label { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-2); margin-bottom: 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    font-family: inherit; font-size: 0.85rem; font-weight: 700; line-height: 1.2;
+    min-height: 40px; padding: 8px 12px; cursor: pointer; border-radius: 0;
+    background: var(--surface); color: var(--ink); border: 2px solid var(--line);
+  }
+  .chip small { color: var(--muted); font-weight: 500; font-size: 0.75rem; margin-left: 6px; font-variant-numeric: tabular-nums; }
+  .chip[aria-checked="true"] { background: var(--accent); color: #fff; box-shadow: 3px 3px 0 var(--shadow); }
+  .chip[aria-checked="true"] small { color: rgba(255,255,255,0.85); }
+  .chip:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+  .preset {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 6px 16px; flex-wrap: wrap;
+    border-top: 2px solid var(--hairline); padding-top: 16px; margin-bottom: 12px;
+  }
+  .preset-name { font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.9rem; }
+  .preset-nums { font-weight: 700; font-size: 1.15rem; color: var(--accent); white-space: nowrap; }
+  .basis { border-top: 2px solid var(--hairline); padding: 10px 0 2px; }
+  .basis-head { display: flex; align-items: center; gap: 4px 12px; flex-wrap: wrap; font-size: 0.9rem; }
+  .basis-head .sets { font-variant-numeric: tabular-nums; color: var(--ink-2); white-space: nowrap; margin-right: auto; }
+  .basis p { color: var(--ink-2); font-size: 0.85rem; margin-top: 4px; }
+  .base-line { font-size: 0.95rem; margin-bottom: 16px; }
+  .base-line b { font-variant-numeric: tabular-nums; }
+  .base-line .why { display: block; color: var(--muted); font-size: 0.8rem; margin-top: 2px; }
+  td .dim, td.dim { color: var(--muted); }
+  td.strong { font-weight: 700; }
+  table.tight { min-width: 0; }
+  table.tight td.num { white-space: nowrap; }
+  th.sel { color: var(--ink); box-shadow: inset 0 -3px 0 var(--c-tap); }
+  .badge.note { color: var(--ink-2); background: transparent; border: 1px solid var(--muted); }
+  .badge.weak { color: var(--ink); background: var(--accent-2); border: 1px solid var(--accent); }
+
+  /* ---- pourover: GH/KH map ---- */
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.78rem; color: var(--ink-2); margin-bottom: 8px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .k-tap { fill: var(--c-tap); }
+  .k-target { fill: var(--c-target); }
+  .k-ref { fill: var(--ink-2); }
+  .k-sca { fill: var(--ink); fill-opacity: 0.07; stroke: var(--hairline); }
+  .map { position: relative; }
+  .map svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .map .grid { stroke: var(--hairline); stroke-width: 1; }
+  .map .axis-t { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .map .axis-l { fill: var(--ink-2); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+  .map .sca { fill: var(--ink); fill-opacity: 0.07; }
+  .map .sca-l { fill: var(--muted); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
+  .map .m-ref { fill: var(--ink-2); stroke: var(--surface); stroke-width: 2; }
+  .map .m-tap { fill: var(--c-tap); stroke: var(--surface); stroke-width: 2; }
+  .map .m-target { fill: var(--c-target); stroke: var(--surface); stroke-width: 2; }
+  .map .move { stroke: var(--c-target); stroke-width: 2; fill: none; }
+  .map .cut { stroke: var(--c-tap); stroke-width: 2; fill: none; }
+  .map .lab { fill: var(--ink-2); font-size: 11px; paint-order: stroke; stroke: var(--surface); stroke-width: 3px; stroke-linejoin: round; }
+  .map .lab.key { fill: var(--ink); font-weight: 700; }
+  .map .hit { fill: transparent; cursor: pointer; outline: none; }
+  .map .hit:focus-visible { stroke: var(--ink); stroke-width: 2; }
+  .map-tip {
+    position: absolute; z-index: 2; pointer-events: none; max-width: 220px;
+    background: var(--surface); color: var(--ink); border: 2px solid var(--line); box-shadow: 3px 3px 0 var(--shadow);
+    padding: 6px 10px; font-size: 0.8rem; line-height: 1.35;
+  }
+  .map-tip b { display: block; font-size: 0.95rem; font-variant-numeric: tabular-nums; }
+  .map-tip span { color: var(--ink-2); }
+  .map-tip em { display: block; font-style: normal; color: var(--muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; }
+  .table-view { margin-top: 12px; }
+  .table-view summary {
+    cursor: pointer; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-2);
+    padding: 8px 0; min-height: 40px; display: flex; align-items: center; gap: 8px; list-style: none;
+  }
+  .table-view summary::-webkit-details-marker { display: none; }
+  .table-view summary::before { content: "+"; color: var(--accent); font-size: 1rem; width: 10px; }
+  .table-view[open] summary::before { content: "−"; }
+
+  /* ---- pourover: tap tick on the meters ---- */
+  .meter-track { position: relative; }
+  .meter-tick { position: absolute; top: -5px; bottom: -5px; width: 4px; margin-left: -2px; background: var(--c-tap); border: 1px solid var(--surface); transition: left 120ms ease; }
+  .tick-key { display: inline-block; width: 4px; height: 14px; background: var(--c-tap); vertical-align: -2px; }
+
   footer { color: var(--muted); font-size: 0.8rem; margin-top: 8px; }
   footer a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent); }
   footer p { margin-bottom: 8px; }
@@ -209,6 +306,12 @@
 </head>
 <body>
 <main>
+  <div class="tabs" role="tablist" aria-label="Brew method">
+    <button type="button" class="tab" role="tab" id="tab-espresso" aria-controls="panel-espresso" aria-selected="true">Espresso</button>
+    <button type="button" class="tab" role="tab" id="tab-pourover" aria-controls="panel-pourover" aria-selected="false">Pourover</button>
+  </div>
+
+  <div id="panel-espresso" role="tabpanel" aria-labelledby="tab-espresso">
   <header>
     <span class="kicker">La Marzocco Linea Mini</span>
     <h1>Espresso Machine Water <span class="accent">Profile</span></h1>
@@ -297,6 +400,207 @@
     <p><b>Chemistry:</b> hardness as CaCO₃ = Epsom mg/L × 100.09/246.47 · alkalinity as CaCO₃ = NaHCO₃ mg/L × 50.04/84.01 · TDS meter estimate ≈ 0.7 × ion sum (conductivity meters under-read MgSO₄/NaHCO₃ vs NaCl calibration).</p>
     <p>Sources: <a href="https://lamarzoccousa.com/wp-content/uploads/2023/09/Water-Specifications.pdf">LM Water Specifications</a> · <a href="https://home.lamarzoccousa.com/water-for-home-espresso-machines/">LM Water for Home Machines</a></p>
   </footer>
+  </div>
+
+  <div id="panel-pourover" role="tabpanel" aria-labelledby="tab-pourover" hidden>
+  <header>
+    <span class="kicker">Seattle tap · Cedar + Tolt</span>
+    <h1>Pourover Water <span class="accent">Profile</span></h1>
+    <p class="sub">Seattle tap is soft — about 26 ppm hardness, 1 mg/L magnesium. Pick the coffee; the same two
+      concentrates from the espresso tab bring carbon-filtered tap up to the target.</p>
+  </header>
+
+  <section class="card">
+    <h2>Coffee</h2>
+    <div class="pick">
+      <div class="pick-label" id="roastLabel">Roast</div>
+      <div class="chips" role="radiogroup" aria-labelledby="roastLabel" id="roastChips"></div>
+    </div>
+    <div class="pick">
+      <div class="pick-label" id="processLabel">Process</div>
+      <div class="chips" role="radiogroup" aria-labelledby="processLabel" id="processChips"></div>
+    </div>
+    <div class="preset">
+      <span class="preset-name" id="presetName"></span>
+      <span class="preset-nums" id="presetNums"></span>
+    </div>
+    <div class="basis">
+      <div class="basis-head"><b id="basisRoastName"></b><span class="sets" id="basisRoastSets"></span><span id="basisRoastTier"></span></div>
+      <p id="basisRoast"></p>
+    </div>
+    <div class="basis">
+      <div class="basis-head"><b id="basisProcName"></b><span class="sets" id="basisProcSets"></span><span id="basisProcTier"></span></div>
+      <p id="basisProc"></p>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Water</h2>
+    <div class="pick">
+      <div class="pick-label" id="baseLabel">Start from</div>
+      <div class="chips" role="radiogroup" aria-labelledby="baseLabel" id="baseChips"></div>
+    </div>
+    <div class="slider-row">
+      <div class="slider-head">
+        <label for="pGh">Total hardness (GH)</label>
+        <span class="val"><span id="pGhVal">70</span><small>ppm as CaCO₃</small></span>
+      </div>
+      <input type="range" id="pGh" min="20" max="140" step="1" value="70">
+      <div class="range-hint"><span>20 · lighter</span><span id="pGhHint">tap 27</span><span>140 · heavier</span></div>
+    </div>
+    <div class="slider-row">
+      <div class="slider-head">
+        <label for="pKh">Alkalinity (KH, buffer)</label>
+        <span class="val"><span id="pKhVal">25</span><small>ppm as CaCO₃</small></span>
+      </div>
+      <input type="range" id="pKh" min="5" max="80" step="1" value="25">
+      <div class="range-hint"><span>5 · brighter</span><span id="pKhHint">tap 25</span><span>80 · flatter</span></div>
+    </div>
+    <div class="slider-row">
+      <div class="slider-head">
+        <label for="pLiters">Batch size</label>
+        <span class="val"><span id="pLitersVal">1</span><small>L (<span id="pGal">0.26</span> gal)</small></span>
+      </div>
+      <input type="range" id="pLiters" min="0.5" max="8" step="0.5" value="1">
+      <div class="range-hint"><span>0.5 L</span><span>8 L</span></div>
+    </div>
+    <div class="share-row" id="pResetRow" hidden>
+      <button type="button" class="share-btn" id="pReset">Reset to preset</button>
+      <p class="share-note">Sliders are off the preset for this coffee.</p>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Recipe</h2>
+    <p class="base-line" id="pBaseLine"></p>
+    <div class="recipe-grid">
+      <div class="dose">
+        <div class="salt">Concentrate A · Epsom salt</div>
+        <div class="grams"><span id="pEpsomMl">0</span> <small>mL</small></div>
+        <div class="conc"><b id="pEpsomG">0</b> g MgSO₄·7H₂O · adds <b id="pAddGh">0</b> ppm GH</div>
+      </div>
+      <div class="dose">
+        <div class="salt">Concentrate B · Baking soda</div>
+        <div class="grams"><span id="pSodaMl">0</span> <small>mL</small></div>
+        <div class="conc"><b id="pSodaG">0</b> g NaHCO₃ · adds <b id="pAddKh">0</b> ppm KH</div>
+      </div>
+    </div>
+    <p class="conc-note"><b>Same bottles as the espresso tab:</b> A = 35.0 g Epsom in 500 mL distilled · B = 15.0 g baking soda in 500 mL distilled. <span id="pSmallDose"></span></p>
+    <p class="conc-note"><b>Carbon-filter the tap first.</b> Seattle disinfects with free chlorine (0.4–1.0 mg/L at the tap), not chloramine, so plain carbon removes it. Pitcher filters with ion-exchange resin also pull hardness and alkalinity, which makes the tap numbers here read high.</p>
+    <div class="share-row">
+      <button type="button" class="share-btn" id="pShareBtn">Copy share link</button>
+      <p class="share-note" id="pShareNote"></p>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Where it sits</h2>
+    <div class="legend" aria-hidden="true">
+      <span><svg width="14" height="14"><rect x="2" y="2" width="10" height="10" class="k-tap"/></svg>Seattle tap</span>
+      <span><svg width="14" height="14"><path d="M7 0.5 13.5 7 7 13.5 0.5 7Z" class="k-target"/></svg>This water</span>
+      <span><svg width="14" height="14"><circle cx="7" cy="7" r="4.5" class="k-ref"/></svg>Published recipe</span>
+      <span><svg width="14" height="14"><rect x="1" y="1" width="12" height="12" class="k-sca"/></svg>SCA range</span>
+    </div>
+    <div class="map" id="pMap"></div>
+    <details class="table-view">
+      <summary>Table view</summary>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Water</th><th>GH</th><th>KH</th><th>Evidence</th></tr></thead>
+          <tbody id="pRefRows"></tbody>
+        </table>
+      </div>
+    </details>
+  </section>
+
+  <section class="card">
+    <h2>What's in it</h2>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>mg/L</th><th id="thCedar">Cedar tap</th><th id="thTolt">Tolt tap</th><th>This water</th><th>Reference</th></tr></thead>
+        <tbody>
+          <tr><td>Hardness <span class="dim">as CaCO₃</span></td><td class="num">27</td><td class="num">25</td><td class="num strong" id="tGh"></td><td class="num">SCA 50–175</td></tr>
+          <tr><td>Alkalinity <span class="dim">as CaCO₃</span></td><td class="num">25</td><td class="num">20</td><td class="num strong" id="tKh"></td><td class="num">SCA 40–70 · Rao 30–40</td></tr>
+          <tr><td>Calcium</td><td class="num">9.0</td><td class="num">9.3</td><td class="num strong" id="tCa"></td><td class="num dim">—</td></tr>
+          <tr><td>Magnesium</td><td class="num">1.1</td><td class="num">0.4</td><td class="num strong" id="tMg"></td><td class="num dim">—</td></tr>
+          <tr><td>Sodium</td><td class="num">2.5</td><td class="num">1.1</td><td class="num strong" id="tNa"></td><td class="num">SCAA target 10</td></tr>
+          <tr><td>Sulfate</td><td class="num">2.0</td><td class="num">1.7</td><td class="num strong" id="tSo4"></td><td class="num">tasted above 250</td></tr>
+          <tr><td>Chloride</td><td class="num">3.7</td><td class="num">3.3</td><td class="num strong" id="tCl"></td><td class="num">tasted above 200</td></tr>
+          <tr><td>Dissolved solids</td><td class="num">48</td><td class="num">41</td><td class="num strong" id="tTds"></td><td class="num">SCAA 75–250</td></tr>
+          <tr><td>pH</td><td class="num">8.2</td><td class="num">8.7</td><td class="num dim">—</td><td class="num">SCA 6–8</td></tr>
+          <tr><td>Free chlorine</td><td class="num">0.95</td><td class="num">0.41</td><td class="num strong">0 <span class="dim">filtered</span></td><td class="num">SCA 0</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="conc-note">Tap columns: mean of 10 quarterly Seattle Public Utilities samples at in-city distribution points, Feb 2024 – May 2026. Hardness is calculated from calcium and magnesium. North-east Seattle sits on the Cedar/Tolt boundary and gets switched between them; the two dose within 5 ppm of each other.</p>
+  </section>
+
+  <section class="card">
+    <h2>In the cup</h2>
+    <span class="profile-name" id="pProfileName"></span>
+    <p class="profile-desc" id="pProfileDesc"></p>
+    <div class="meter-row"><span class="m-label">Acidity / brightness</span><div class="meter-track"><div class="meter-fill" id="pmAcidity"></div><i class="meter-tick" id="ptAcidity"></i></div></div>
+    <div class="meter-row"><span class="m-label">Sweetness</span><div class="meter-track"><div class="meter-fill" id="pmSweet"></div><i class="meter-tick" id="ptSweet"></i></div></div>
+    <div class="meter-row"><span class="m-label">Body</span><div class="meter-track"><div class="meter-fill" id="pmBody"></div><i class="meter-tick" id="ptBody"></i></div></div>
+    <div class="meter-row"><span class="m-label">Sharp / sour risk</span><div class="meter-track"><div class="meter-fill risk" id="pmSharp"></div><i class="meter-tick" id="ptSharp"></i></div></div>
+    <div class="meter-row"><span class="m-label">Flat / muted risk</span><div class="meter-track"><div class="meter-fill risk" id="pmFlat"></div><i class="meter-tick" id="ptFlat"></i></div></div>
+    <p class="conc-note"><i class="tick-key"></i> = <span id="pTickLabel">straight tap</span>. Directional only: alkalinity's effect is measured, hardness's is practitioner consensus with conflicting tests.</p>
+  </section>
+
+  <section class="card">
+    <h2>Tune by taste</h2>
+    <div class="table-scroll">
+      <table class="tight">
+        <thead><tr><th>Cup tastes</th><th>Move</th><th>Step</th></tr></thead>
+        <tbody>
+          <tr><td>Sour, sharp, thin</td><td>Alkalinity up</td><td class="num">+5 to +10 KH</td></tr>
+          <tr><td>Flat, chalky, dull fruit</td><td>Alkalinity down</td><td class="num">−5 to −10 KH</td></tr>
+          <tr><td>Hollow, watery, low sweetness</td><td>Hardness up</td><td class="num">+10 to +20 GH</td></tr>
+          <tr><td>Heavy, drying, bitter finish</td><td>Hardness down</td><td class="num">−10 to −20 GH</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="conc-note">One move at a time, same coffee, same recipe.</p>
+  </section>
+
+  <section class="card">
+    <h2>By coffee, or universal?</h2>
+    <span class="profile-name">Mostly universal</span>
+    <p class="profile-desc">Alkalinity first, hardness second, then tune each bag by taste.</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Axis</th><th>Published numbers</th><th>What it moves</th><th>Evidence</th></tr></thead>
+        <tbody>
+          <tr><td>Alkalinity</td><td>Yes, consistent</td><td>Neutralizes acid about 1:1</td><td><span class="badge ok">Measured</span></td></tr>
+          <tr><td>Hardness</td><td>Yes, 35 to 130</td><td>Perception, not yield — extraction is flat from 20 to 250</td><td><span class="badge note">Taste disputed</span></td></tr>
+          <tr><td>Roast</td><td>Vendors only</td><td>Alkalinity up from light to medium; dark is split</td><td><span class="badge note">Vendor</span></td></tr>
+          <tr><td>Process</td><td>Almost none</td><td>One vendor shifts magnesium toward calcium for naturals</td><td><span class="badge weak">Inferred</span></td></tr>
+          <tr><td>Variety / origin</td><td>None</td><td>Brewers Cup winners tune by taste; winning waters span 40–110 dissolved solids</td><td><span class="badge note">Practitioner</span></td></tr>
+          <tr><td>Roaster's water</td><td>Some</td><td>Roasters roast to their own water: Oslo tap is 41 / 32</td><td><span class="badge note">Practitioner</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    <p><b>Why Epsom only for hardness?</b> Tap already supplies the calcium (9 mg/L). Magnesium is what Seattle lacks, and blind tests disagree on which way magnesium versus calcium pushes flavor, so there's no evidence-backed reason to add a third salt. Sulfate lands far under its taste threshold.</p>
+    <p><b>Target below tap?</b> Salts only add. When a target is under the tap's hardness or alkalinity, the recipe cuts the tap with distilled first, then doses.</p>
+    <p><b>Process counts</b> on the chips are offerings across the roasters in the untamped graph, Sep 2026. Roast level isn't recorded there.</p>
+    <p>Sources:
+      <a href="https://www.seattle.gov/utilities/your-services/water/water-quality/analyses">Seattle Public Utilities water analyses</a> ·
+      <a href="https://coffeegeek.com/wp-content/uploads/2023/10/SCAGoldCupStandard.pdf">SCA Standard 310-2021</a> ·
+      <a href="https://sca.coffee/sca-news/25/issue-9/english/water-and-coffee-acidity-how-to-adapt-your-water-for-different-extraction-methods-25-magazine-issue-9-pxjby">Wellinger, water and acidity</a> ·
+      <a href="https://www.baristahustle.com/diy-water-recipes-redux/">Barista Hustle recipes</a> ·
+      <a href="https://lotuscoffeeproducts.com/pages/product-instructions">Lotus recipes</a> ·
+      <a href="https://www.scottrao.com/blog/2023/6/4/demystifying-water-for-coffee">Rao, Demystifying Water</a> ·
+      <a href="https://coffeeadastra.com/2018/12/16/water-for-coffee-extraction/">Gagné, Water for Coffee Extraction</a> ·
+      <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10907646/">Bratthäll 2024</a> ·
+      <a href="https://pubs.acs.org/doi/10.1021/jf501687c">Hendon 2014</a> ·
+      <a href="https://www.home-barista.com/water/oslo-water-t73128.html">Oslo water</a> ·
+      <a href="https://www.home-barista.com/water/water-for-light-roasts-and-pourover-t82971.html">Sey, reported</a>
+    </p>
+  </footer>
+  </div>
 </main>
 
 <script>
@@ -308,6 +612,12 @@
   const CONC_A = 70, CONC_B = 30;            // mg salt per mL of concentrate
 
   const $ = id => document.getElementById(id);
+
+  // Each tab owns the query string while it's showing, so a shared link only
+  // ever carries the params of the profile it describes.
+  const ESP_KEYS = ['hardness', 'alkalinity', 'batch'];
+  const POUR_KEYS = ['tab', 'roast', 'process', 'base', 'gh', 'kh', 'liters'];
+  let activeTab = 'espresso';
   const clamp01 = x => Math.max(0, Math.min(1, x));
 
   function badge(el, ok, okText, outText) {
@@ -406,7 +716,7 @@
   // a value the slider can actually represent. Anything unparseable -> null,
   // which falls back to the default rather than rendering NaN.
   function readParam(params, f) {
-    const raw = params.get(f.id);
+    const raw = params.get(f.param || f.id);
     if (raw === null || raw.trim() === '') return null;
     const n = Number(raw);
     if (!Number.isFinite(n)) return null;
@@ -424,7 +734,9 @@
   }
 
   function syncUrl() {
+    if (activeTab !== 'espresso') return;
     const url = new URL(window.location.href);
+    POUR_KEYS.forEach(k => url.searchParams.delete(k));
     FIELDS.forEach(f => {
       const v = +$(f.id).value;
       if (v === f.def) url.searchParams.delete(f.id);
@@ -436,30 +748,28 @@
     // replaceState, not pushState: dragging a slider fires input continuously and
     // would otherwise bury the user's previous page under dozens of history entries.
     history.replaceState(null, '', next);
-    resetShareBtn();
+    resetShareBtn($('shareBtn'));
   }
 
-  let copiedTimer = null;
-  function resetShareBtn() {
-    const btn = $('shareBtn');
-    if (copiedTimer) { clearTimeout(copiedTimer); copiedTimer = null; }
+  const copiedTimers = new Map();
+  function resetShareBtn(btn) {
+    if (copiedTimers.has(btn)) { clearTimeout(copiedTimers.get(btn)); copiedTimers.delete(btn); }
     btn.classList.remove('copied');
     btn.textContent = 'Copy share link';
   }
 
-  function flashShareBtn(text) {
-    const btn = $('shareBtn');
-    if (copiedTimer) clearTimeout(copiedTimer);
+  function flashShareBtn(btn, text) {
+    if (copiedTimers.has(btn)) clearTimeout(copiedTimers.get(btn));
     btn.classList.add('copied');
     btn.textContent = text;
-    copiedTimer = setTimeout(resetShareBtn, 2000);
+    copiedTimers.set(btn, setTimeout(() => resetShareBtn(btn), 2000));
   }
 
-  async function copyShareLink() {
+  async function copyShareLink(btn) {
     const link = location.href;
     try {
       await navigator.clipboard.writeText(link);
-      flashShareBtn('Copied ✓');
+      flashShareBtn(btn, 'Copied ✓');
       return;
     } catch (e) { /* not available on http:// or without permission — fall through */ }
     const ta = document.createElement('textarea');
@@ -471,18 +781,470 @@
     let ok = false;
     try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
     document.body.removeChild(ta);
-    flashShareBtn(ok ? 'Copied ✓' : 'Press ⌘C');
+    flashShareBtn(btn, ok ? 'Copied ✓' : 'Press ⌘C');
   }
 
-  $('shareBtn').addEventListener('click', copyShareLink);
+  $('shareBtn').addEventListener('click', () => copyShareLink($('shareBtn')));
+
+  /* =========================== POUROVER ===========================
+     Same two concentrates, different problem: there's no boiler to protect,
+     so the spec is taste, and the base is Seattle tap rather than distilled.
+     Tap values are means of 10 quarterly SPU samples at in-city distribution
+     points (Feb 2024 – May 2026); hardness is 2.497·Ca + 4.118·Mg. */
+  const TAP = {
+    cedar:     { label: 'Cedar tap', short: 'Cedar', gh: 27, kh: 25, ca: 9.0, mg: 1.1, na: 2.5, so4: 2.0, cl: 3.7, tds: 48 },
+    tolt:      { label: 'Tolt tap',  short: 'Tolt',  gh: 25, kh: 20, ca: 9.3, mg: 0.4, na: 1.1, so4: 1.7, cl: 3.3, tds: 41 },
+    distilled: { label: 'Distilled', short: 'Distilled', gh: 0, kh: 0, ca: 0, mg: 0, na: 0, so4: 0, cl: 0, tds: 0 },
+  };
+
+  // Roast sets both targets. Process only nudges alkalinity: it's the one lever
+  // with a measured mechanism, and nobody publishes process-specific hardness.
+  const ROASTS = {
+    light:  { label: 'Light',  gh: 70, kh: 25, tier: 'Practitioner', cls: 'note',
+              basis: 'Lotus Light and Bright 60 / 25 · Rao (updated) 72 / 20 · Lotus Bright and Juicy 72 / 18' },
+    medium: { label: 'Medium', gh: 70, kh: 40, tier: 'Standard', cls: 'ok',
+              basis: 'SCA 68 / 40 · Barista Hustle 81 / 40 · Rao/Perger 90 / 42' },
+    dark:   { label: 'Dark',   gh: 50, kh: 40, tier: 'Disputed', cls: 'weak',
+              basis: 'Hardness down per Apax Lab and Barista Hustle. Alkalinity is split — Third Wave Water and Empirical raise it, Barista Hustle lowers it — so it holds at SCA’s 40.' },
+  };
+  const PROCESSES = {
+    washed:    { label: 'Washed', n: 665, dkh: 0, tier: 'Practitioner', cls: 'note',
+                 basis: 'Baseline. Lotus Bright and Juicy (72 / 18) is published for light washed coffees.' },
+    honey:     { label: 'Honey', n: 147, dkh: 0, tier: 'Inferred', cls: 'weak',
+                 basis: 'No published numbers. Treated as washed.' },
+    natural:   { label: 'Natural', n: 546, dkh: 5, tier: 'Inferred', cls: 'weak',
+                 basis: 'No published hardness or alkalinity difference. +5 buffer for winey acidity.' },
+    anaerobic: { label: 'Anaerobic / carbonic', n: 296, dkh: 10, tier: 'Inferred', cls: 'weak',
+                 basis: 'No published numbers. +10 buffer rounds lactic and acetic sharpness.' },
+    coferment: { label: 'Thermal shock / co-ferment', n: 155, dkh: 10, tier: 'Inferred', cls: 'weak',
+                 basis: 'No published numbers. +10 buffer, same reasoning as anaerobic.' },
+    blend:     { label: 'Blend / not stated', n: null, dkh: 0, tier: 'Inferred', cls: 'weak',
+                 basis: 'Roast alone sets the target.' },
+  };
+
+  // [name, KH, GH, evidence, direct label, label side, label priority]
+  // Priority 1 labels always show; priority 2 only when the plot is wide enough.
+  const REFS = [
+    ['SCA standard (2009)',        40,   68,   'Standard',     'SCA',                'r', 2],
+    ['Barista Hustle',             40.1, 80.7, 'Practitioner', 'Barista Hustle',     'r', 2],
+    ['Rao/Perger',                 42,   90,   'Practitioner', 'Rao/Perger',         'r', 1],
+    ['Hendon (Barista Hustle #6)', 30.8, 99.9, 'Practitioner', 'Hendon',             'l', 2],
+    ['World of Coffee Budapest',   40.1, 51.2, 'Practitioner', 'WOC Budapest',       'r', 2],
+    ['Third Wave Water Classic',   40,   130,  'Third-party',  'Third Wave Classic', 'r', 2],
+    ['Rao, updated (Lotus)',       20.1, 72.3, 'Practitioner'],
+    ['Lotus Bright and Juicy',     18,   72,   'Practitioner'],
+    ['Lotus Light and Bright',     25,   60,   'Practitioner'],
+    ['Sey',                        15,   50,   'Reported',     'Sey (reported)',     'l', 2],
+    ['Oslo tap (Tim Wendelboe)',   32,   41,   'Reported',     'Oslo tap',           'r', 1],
+    ['Empirical Glacial',          24,   35,   'Vendor'],
+    ['Lotus Ultra Light',          10,   35,   'Practitioner'],
+    ['Barista Hustle Melbourne',   11.5, 23.7, 'Practitioner'],
+  ];
+
+  const P_FIELDS = [
+    { id: 'pGh',     param: 'gh',     min: 20,  max: 140, step: 1   },
+    { id: 'pKh',     param: 'kh',     min: 5,   max: 80,  step: 1   },
+    { id: 'pLiters', param: 'liters', min: 0.5, max: 8,   step: 0.5, def: 1 },
+  ];
+  const P_DEF = { roast: 'light', process: 'washed', base: 'cedar' };
+  const pick = { roast: P_DEF.roast, process: P_DEF.process, base: P_DEF.base };
+
+  function preset() {
+    const r = ROASTS[pick.roast];
+    return { gh: r.gh, kh: r.kh + PROCESSES[pick.process].dkh };
+  }
+
+  /* ---------- chip groups (radio semantics, roving arrow keys) ---------- */
+  function buildChips(hostId, key, options, onPick) {
+    const host = $(hostId);
+    Object.keys(options).forEach(k => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip';
+      b.setAttribute('role', 'radio');
+      b.dataset.key = k;
+      b.textContent = options[k].label;
+      if (options[k].n) {
+        const s = document.createElement('small');
+        s.textContent = options[k].n;
+        b.appendChild(s);
+      }
+      b.addEventListener('click', () => onPick(k));
+      host.appendChild(b);
+    });
+    host.addEventListener('keydown', e => {
+      const dir = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+      if (!dir) return;
+      e.preventDefault();
+      const keys = Object.keys(options);
+      const next = keys[(keys.indexOf(pick[key]) + dir + keys.length) % keys.length];
+      onPick(next);
+      host.querySelector('[data-key="' + next + '"]').focus();
+    });
+  }
+  function paintChips(hostId, selected) {
+    $(hostId).querySelectorAll('.chip').forEach(b => {
+      const on = b.dataset.key === selected;
+      b.setAttribute('aria-checked', on ? 'true' : 'false');
+      b.tabIndex = on ? 0 : -1;
+    });
+  }
+
+  function toPreset() {
+    const p = preset();
+    $('pGh').value = p.gh;
+    $('pKh').value = p.kh;
+  }
+
+  /* ---------- flavor model (directional) ---------- */
+  function cup(gh, kh) {
+    return {
+      acidity: clamp01((1 - kh / 70) * (1 - 0.1 * gh / 140)),
+      sweet:   clamp01(1 - Math.abs(gh - 80) / 110 - Math.abs(kh - 32) / 60),
+      body:    clamp01(0.15 + 0.6 * gh / 140 + 0.15 * kh / 80),
+      sharp:   clamp01(Math.max(0, 30 - kh) / 30 * 0.7 + Math.max(0, 50 - gh) / 50 * 0.5),
+      flat:    clamp01(Math.max(0, kh - 45) / 35),
+    };
+  }
+  const P_NAMES = [
+    ['Nordic & Tea-like', 'Soft & Clean',     'Soft & Muted'],
+    ['Bright & Juicy',    'Sweet & Balanced', 'Round & Mellow'],
+    ['Punchy & Vivid',    'Big & Syrupy',     'Heavy & Flat'],
+  ];
+  const P_GH_DESC = [
+    'Hardness this low keeps the cup light and tea-like; sweetness and body stay lean.',
+    'Hardness in the range most published filter recipes use: fuller sweetness and body.',
+    'Hardness this high reads heavy; watch for a drying, bitter finish.',
+  ];
+  const P_KH_DESC = [
+    'Little buffer, so acidity arrives unedited — vivid on a good coffee, sharp on an underdeveloped one.',
+    'Enough buffer to turn acidity into sweetness-adjacent brightness.',
+    'Buffer this high neutralizes most of the acidity; fruit goes dull.',
+  ];
+  const band = (v, lo, hi) => v < lo ? 0 : v <= hi ? 1 : 2;
+
+  /* ---------- GH/KH map ---------- */
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  function svg(name, attrs, text) {
+    const n = document.createElementNS(SVG_NS, name);
+    Object.keys(attrs || {}).forEach(k => n.setAttribute(k, attrs[k]));
+    if (text != null) n.textContent = text;
+    return n;
+  }
+  const r1 = v => Math.round(v * 10) / 10;
+
+  let tip = null;
+  function showTip(host, x, y, d) {
+    if (!tip) { tip = document.createElement('div'); tip.className = 'map-tip'; }
+    tip.textContent = '';
+    const b = document.createElement('b'); b.textContent = 'GH ' + r1(d.gh) + ' / KH ' + r1(d.kh);
+    const s = document.createElement('span'); s.textContent = d.name;
+    const e = document.createElement('em'); e.textContent = d.tier;
+    tip.append(b, s, e);
+    host.appendChild(tip);
+    const w = tip.offsetWidth, h = tip.offsetHeight, W = host.clientWidth;
+    tip.style.left = Math.max(0, Math.min(W - w, x - w / 2)) + 'px';
+    tip.style.top = (y - h - 14 < 0 ? y + 16 : y - h - 14) + 'px';
+  }
+  function hideTip() { if (tip && tip.parentNode) tip.parentNode.removeChild(tip); }
+
+  function drawMap(gh, kh, f) {
+    const host = $('pMap');
+    const W = host.clientWidth;
+    if (!W) return;                       // panel hidden — drawn when the tab opens
+    hideTip();
+    host.textContent = '';
+    const wide = W >= 520;
+    const H = Math.round(Math.max(300, Math.min(440, W * 0.68)));
+    const m = { l: 34, r: 14, t: 28, b: 42 };
+    const KMAX = 80, GMAX = 140;
+    const X = v => m.l + v / KMAX * (W - m.l - m.r);
+    const Y = v => H - m.b - v / GMAX * (H - m.t - m.b);
+    const root = svg('svg', { viewBox: '0 0 ' + W + ' ' + H, width: W, height: H, role: 'img',
+      'aria-label': 'Hardness against alkalinity: Seattle tap, this water, and published recipes. Values are in the table view below.' });
+
+    // SCA 310-2021 range: alkalinity 40–70, hardness 50–175 (runs off the top)
+    root.appendChild(svg('rect', { class: 'sca', x: X(40), y: Y(GMAX), width: X(70) - X(40), height: Y(50) - Y(GMAX) }));
+    root.appendChild(svg('text', { class: 'sca-l', x: X(70) - 6, y: Y(50) - 7, 'text-anchor': 'end' }, 'SCA range'));
+
+    for (let g = 0; g <= GMAX; g += wide ? 20 : 40) {
+      root.appendChild(svg('line', { class: 'grid', x1: m.l, x2: W - m.r, y1: Y(g), y2: Y(g) }));
+      root.appendChild(svg('text', { class: 'axis-t', x: m.l - 8, y: Y(g) + 4, 'text-anchor': 'end' }, g));
+    }
+    for (let k = 0; k <= KMAX; k += 20) {
+      root.appendChild(svg('line', { class: 'grid', x1: X(k), x2: X(k), y1: m.t, y2: H - m.b }));
+      root.appendChild(svg('text', { class: 'axis-t', x: X(k), y: H - m.b + 16, 'text-anchor': 'middle' }, k));
+    }
+    root.appendChild(svg('text', { class: 'axis-l', x: m.l, y: H - 6 }, 'Alkalinity (KH) →'));
+    root.appendChild(svg('text', { class: 'axis-l', x: 0, y: 12 }, '↑ Hardness (GH)'));
+
+    const marks = [];
+    // side: l / r beside the mark, a / b centred above / below it
+    function label(d, text, side, key) {
+      const beside = side === 'l' || side === 'r';
+      root.appendChild(svg('text', { class: 'lab' + (key ? ' key' : ''),
+        x: X(d.kh) + (side === 'l' ? -10 : side === 'r' ? 10 : 0),
+        y: Y(d.gh) + (side === 'a' ? -13 : side === 'b' ? 20 : 4),
+        'text-anchor': side === 'l' ? 'end' : beside ? 'start' : 'middle' }, text));
+    }
+
+    // The target moves, the recipe labels don't: drop any recipe label the
+    // target's own label would land on (its value stays in the tooltip + table).
+    const above = gh <= 125;
+    const tBox = { x0: X(kh) - 40, x1: X(kh) + 40, y0: Y(gh) + (above ? -28 : 8), y1: Y(gh) + (above ? -8 : 26) };
+    const clear = (d, text, side) => {
+      const w = text.length * 6.4, x = X(d.kh) + (side === 'l' ? -10 - w : 10);
+      return x > tBox.x1 || x + w < tBox.x0 || Y(d.gh) - 9 > tBox.y1 || Y(d.gh) + 7 < tBox.y0;
+    };
+
+    REFS.forEach(r => {
+      const d = { name: r[0], kh: r[1], gh: r[2], tier: r[3] };
+      root.appendChild(svg('circle', { class: 'm-ref', cx: X(d.kh), cy: Y(d.gh), r: 5 }));
+      if (r[4] && (r[6] === 1 || wide) && clear(d, r[4], r[5])) label(d, r[4], r[5]);
+      marks.push(d);
+    });
+
+    // the move: tap → (cut with distilled) → target
+    const b = TAP[pick.base];
+    const start = { kh: b.kh * f, gh: b.gh * f };
+    if (f < 0.999) root.appendChild(svg('line', { class: 'cut', x1: X(b.kh), y1: Y(b.gh), x2: X(start.kh), y2: Y(start.gh) }));
+    root.appendChild(svg('line', { class: 'move', x1: X(start.kh), y1: Y(start.gh), x2: X(kh), y2: Y(gh) }));
+
+    ['tolt', 'cedar'].forEach(k => {
+      const t = TAP[k];
+      const d = { name: t.label + ', Seattle', kh: t.kh, gh: t.gh, tier: 'Measured · SPU 2024–26' };
+      root.appendChild(svg('rect', { class: 'm-tap', x: X(d.kh) - 5.5, y: Y(d.gh) - 5.5, width: 11, height: 11 }));
+      label(d, t.short, k === 'tolt' ? 'b' : 'r', true);
+      marks.push(d);
+    });
+    if (pick.base === 'distilled') {
+      const d = { name: 'Distilled', kh: 0, gh: 0, tier: 'Base' };
+      root.appendChild(svg('rect', { class: 'm-tap', x: X(0) - 5.5, y: Y(0) - 5.5, width: 11, height: 11 }));
+      marks.push(d);
+    }
+
+    const tx = X(kh), ty = Y(gh), s = 8;
+    root.appendChild(svg('path', { class: 'm-target', d: 'M' + tx + ' ' + (ty - s) + ' ' + (tx + s) + ' ' + ty + ' ' + tx + ' ' + (ty + s) + ' ' + (tx - s) + ' ' + ty + 'Z' }));
+    const target = { name: 'This water', kh: kh, gh: gh, tier: ROASTS[pick.roast].label + ' · ' + PROCESSES[pick.process].label };
+    label(target, 'This water', above ? 'a' : 'b', true);
+    marks.push(target);
+
+    // hit targets last so they sit above every mark; 26px across
+    marks.forEach(d => {
+      const h = svg('circle', { class: 'hit', cx: X(d.kh), cy: Y(d.gh), r: 13, tabindex: 0, role: 'img',
+        'aria-label': d.name + ': hardness ' + r1(d.gh) + ', alkalinity ' + r1(d.kh) + ' (' + d.tier + ')' });
+      const on = () => showTip(host, X(d.kh), Y(d.gh), d);
+      h.addEventListener('pointerenter', on);
+      h.addEventListener('focus', on);
+      h.addEventListener('pointerleave', hideTip);
+      h.addEventListener('blur', hideTip);
+      root.appendChild(h);
+    });
+    host.appendChild(root);
+  }
+
+  function buildRefRows() {
+    const rows = REFS.map(r => [r[0], r[2], r[1], r[3]])
+      .concat([['Cedar tap, Seattle', 27, 25, 'Measured'], ['Tolt tap, Seattle', 25, 20, 'Measured']])
+      .sort((a, b) => b[1] - a[1]);
+    const body = $('pRefRows');
+    rows.forEach(r => {
+      const tr = document.createElement('tr');
+      r.forEach((v, i) => {
+        const td = document.createElement('td');
+        if (i === 1 || i === 2) td.className = 'num';
+        td.textContent = typeof v === 'number' ? r1(v) : v;
+        tr.appendChild(td);
+      });
+      body.appendChild(tr);
+    });
+  }
+
+  /* ---------- render ---------- */
+  const fmtMl = v => v === 0 ? '0' : v >= 10 ? v.toFixed(1) : v.toFixed(2);
+  const fmtG = v => v === 0 ? '0' : v < 1 ? v.toFixed(3) : v.toFixed(2);
+  const fmt1 = v => v >= 100 ? String(Math.round(v)) : v.toFixed(1);
+  const tierBadge = o => '<span class="badge ' + o.cls + '">' + o.tier + '</span>';
+
+  function renderPour() {
+    const gh = +$('pGh').value, kh = +$('pKh').value, L = +$('pLiters').value;
+    const b = TAP[pick.base];
+    const r = ROASTS[pick.roast], pr = PROCESSES[pick.process], pre = preset();
+
+    paintChips('roastChips', pick.roast);
+    paintChips('processChips', pick.process);
+    paintChips('baseChips', pick.base);
+    $('presetName').textContent = r.label + ' · ' + pr.label;
+    $('presetNums').textContent = 'GH ' + pre.gh + ' / KH ' + pre.kh;
+    $('basisRoastName').textContent = r.label + ' roast';
+    $('basisRoastSets').textContent = 'GH ' + r.gh + ' · KH ' + r.kh;
+    $('basisRoast').textContent = r.basis;
+    $('basisRoastTier').innerHTML = tierBadge(r);
+    $('basisProcName').textContent = pr.label;
+    $('basisProcSets').textContent = 'KH +' + pr.dkh;
+    $('basisProc').textContent = pr.basis;
+    $('basisProcTier').innerHTML = tierBadge(pr);
+
+    $('pGhVal').textContent = gh;
+    $('pKhVal').textContent = kh;
+    $('pLitersVal').textContent = L;
+    $('pGal').textContent = (L / L_PER_GAL).toFixed(2);
+    $('pGhHint').textContent = pick.base === 'distilled' ? 'distilled 0' : b.short + ' tap ' + b.gh;
+    $('pKhHint').textContent = pick.base === 'distilled' ? 'distilled 0' : b.short + ' tap ' + b.kh;
+    $('pResetRow').hidden = gh === pre.gh && kh === pre.kh;
+
+    // Salts only add. If a target sits under the tap, cut the tap with distilled
+    // until both of its numbers fit under the targets, then dose the remainder.
+    const f = Math.min(1, b.gh ? gh / b.gh : 1, b.kh ? kh / b.kh : 1);
+    const addGh = Math.max(0, gh - f * b.gh), addKh = Math.max(0, kh - f * b.kh);
+    const epsomMgL = addGh / H_FACT, sodaMgL = addKh / A_FACT;
+    const epsomG = epsomMgL * L / 1000, sodaG = sodaMgL * L / 1000;
+    const epsomMl = epsomG * 1000 / CONC_A, sodaMl = sodaG * 1000 / CONC_B;
+
+    const ml = v => Math.round(v * L * 1000);
+    let base;
+    if (pick.base === 'distilled') base = 'Into <b>' + L + ' L</b> distilled water:';
+    else if (f >= 0.999) base = 'Into <b>' + L + ' L</b> carbon-filtered ' + b.short + ' tap:';
+    else base = 'Into <b>' + ml(f) + ' mL</b> carbon-filtered ' + b.short + ' tap + <b>' + ml(1 - f) + ' mL</b> distilled:' +
+      '<span class="why">The target is below the tap, so the tap is cut first.</span>';
+    $('pBaseLine').innerHTML = base;
+
+    $('pEpsomMl').textContent = fmtMl(epsomMl);
+    $('pSodaMl').textContent = fmtMl(sodaMl);
+    $('pEpsomG').textContent = fmtG(epsomG);
+    $('pSodaG').textContent = fmtG(sodaG);
+    $('pAddGh').textContent = Math.round(addGh);
+    $('pAddKh').textContent = Math.round(addKh);
+    const tiny = [epsomMl, sodaMl].some(v => v > 0 && v < 0.5);
+    $('pSmallDose').textContent = tiny
+      ? 'A dose under 0.5 mL is hard to measure: mix a bigger batch, or dilute that concentrate 1:10 and dose ten times the volume.'
+      : '';
+
+    // what's in it
+    const MG_PER = MW.mg / MW.caco3, SO4_PER = MW.so4 / MW.caco3, NA_PER = 22.99 / (MW.caco3 / 2);
+    $('tGh').textContent = gh;
+    $('tKh').textContent = kh;
+    $('tCa').textContent = fmt1(f * b.ca);
+    $('tMg').textContent = fmt1(f * b.mg + addGh * MG_PER);
+    $('tNa').textContent = fmt1(f * b.na + addKh * NA_PER);
+    $('tSo4').textContent = fmt1(f * b.so4 + addGh * SO4_PER);
+    $('tCl').textContent = fmt1(f * b.cl);
+    $('tTds').textContent = Math.round(f * b.tds + epsomMgL * (MW.mg + MW.so4) / MW.epsom + sodaMgL);
+    $('thCedar').classList.toggle('sel', pick.base === 'cedar');
+    $('thTolt').classList.toggle('sel', pick.base === 'tolt');
+
+    // in the cup: bar = this water, tick = the base straight
+    const c = cup(gh, kh), t = cup(b.gh, b.kh);
+    [['Acidity', 'acidity'], ['Sweet', 'sweet'], ['Body', 'body'], ['Sharp', 'sharp'], ['Flat', 'flat']].forEach(p => {
+      $('pm' + p[0]).style.width = (c[p[1]] * 100) + '%';
+      $('pt' + p[0]).style.left = (t[p[1]] * 100) + '%';
+    });
+    $('pTickLabel').textContent = pick.base === 'distilled' ? 'straight distilled' : 'straight ' + b.short + ' tap';
+    const name = P_NAMES[band(gh, 50, 90)][band(kh, 22, 45)];
+    $('pProfileName').textContent = name;
+    $('pProfileDesc').textContent = P_GH_DESC[band(gh, 50, 90)] + ' ' + P_KH_DESC[band(kh, 22, 45)];
+
+    drawMap(gh, kh, f);
+
+    syncPourUrl();
+    $('pShareNote').innerHTML =
+      'This page’s link now encodes <b>' + r.label + ' · ' + pr.label + '</b> at <b>GH ' + gh + ' / KH ' + kh + '</b> — ' +
+      '<b>' + fmtMl(epsomMl) + ' mL</b> A + <b>' + fmtMl(sodaMl) + ' mL</b> B per <b>' + L + ' L</b>.';
+  }
+
+  /* ---------- URL: ?tab=pourover&roast=&process=&base=&gh=&kh=&liters= ----------
+     gh/kh are written only when the sliders are off the preset, so a link that
+     names a coffee keeps tracking the preset if the preset is ever retuned. */
+  function applyPourUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const opts = { roast: ROASTS, process: PROCESSES, base: TAP };
+    Object.keys(opts).forEach(k => {
+      const v = params.get(k);
+      pick[k] = v !== null && Object.prototype.hasOwnProperty.call(opts[k], v) ? v : P_DEF[k];
+    });
+    toPreset();
+    P_FIELDS.forEach(f => {
+      const v = readParam(params, f);
+      if (v !== null) $(f.id).value = v;
+      else if (f.def !== undefined) $(f.id).value = f.def;
+    });
+  }
+
+  function syncPourUrl() {
+    if (activeTab !== 'pourover') return;
+    const url = new URL(window.location.href);
+    ESP_KEYS.forEach(k => url.searchParams.delete(k));
+    url.searchParams.set('tab', 'pourover');
+    Object.keys(P_DEF).forEach(k => {
+      if (pick[k] === P_DEF[k]) url.searchParams.delete(k);
+      else url.searchParams.set(k, pick[k]);
+    });
+    const pre = preset();
+    const defs = { gh: pre.gh, kh: pre.kh, liters: 1 };
+    P_FIELDS.forEach(f => {
+      const v = +$(f.id).value;
+      if (v === defs[f.param]) url.searchParams.delete(f.param);
+      else url.searchParams.set(f.param, String(v));
+    });
+    const next = url.pathname + url.search + url.hash;
+    if (next === location.pathname + location.search + location.hash) return;
+    history.replaceState(null, '', next);
+    resetShareBtn($('pShareBtn'));
+  }
+
+  buildChips('roastChips', 'roast', ROASTS, k => { pick.roast = k; toPreset(); renderPour(); });
+  buildChips('processChips', 'process', PROCESSES, k => { pick.process = k; toPreset(); renderPour(); });
+  buildChips('baseChips', 'base', TAP, k => { pick.base = k; renderPour(); });
+  buildRefRows();
+  P_FIELDS.forEach(f => $(f.id).addEventListener('input', renderPour));
+  $('pReset').addEventListener('click', () => { toPreset(); renderPour(); });
+  $('pShareBtn').addEventListener('click', () => copyShareLink($('pShareBtn')));
+
+  let resizeTimer = null;
+  window.addEventListener('resize', () => {
+    if (activeTab !== 'pourover') return;
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(renderPour, 120);
+  });
+
+  /* =========================== TABS =========================== */
+  const TITLES = { espresso: 'Espresso Machine Water Profile', pourover: 'Pourover Water Profile' };
+  function showTab(name) {
+    activeTab = name;
+    Object.keys(TITLES).forEach(t => {
+      const on = t === name;
+      $('tab-' + t).setAttribute('aria-selected', on ? 'true' : 'false');
+      $('tab-' + t).tabIndex = on ? 0 : -1;
+      $('panel-' + t).hidden = !on;
+    });
+    document.title = TITLES[name];
+    if (name === 'pourover') renderPour(); else render();
+  }
+  Object.keys(TITLES).forEach(t => $('tab-' + t).addEventListener('click', () => showTab(t)));
+  document.querySelector('.tabs').addEventListener('keydown', e => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    e.preventDefault();
+    const next = activeTab === 'espresso' ? 'pourover' : 'espresso';
+    showTab(next);
+    $('tab-' + next).focus();
+  });
+
+  function tabFromUrl() {
+    return new URLSearchParams(window.location.search).get('tab') === 'pourover' ? 'pourover' : 'espresso';
+  }
 
   // Back/forward re-reads the URL, so the URL stays the source of truth on
   // navigation even though state lives in the inputs the rest of the time.
-  window.addEventListener('popstate', () => { applyUrl(); render(); });
+  window.addEventListener('popstate', () => {
+    const t = tabFromUrl();
+    if (t === 'pourover') applyPourUrl(); else applyUrl();
+    showTab(t);
+  });
 
   ['hardness', 'alkalinity', 'batch'].forEach(id => $(id).addEventListener('input', render));
   applyUrl();
-  render();
+  applyPourUrl();
+  showTab(tabFromUrl());
 })();
 </script>
 </body>
