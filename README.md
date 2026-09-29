@@ -3,7 +3,7 @@
 Interactive calculator for DIY coffee water, in two tabs:
 
 - **Espresso** — water that stays inside [La Marzocco's water spec](https://lamarzoccousa.com/wp-content/uploads/2023/09/Water-Specifications.pdf), built for a Linea Mini fed from 1-gallon jugs of distilled water.
-- **Pourover** — Seattle tap (Cedar or Tolt) brought up to a filter-coffee target with the same two concentrates.
+- **Pourover** — Seattle tap (Cedar or Tolt) brought up to a filter-coffee target with two stock solutions, dosed for a single kettle.
 
 **Live:** https://robbybro.github.io/marzocco-water/
 
@@ -45,18 +45,18 @@ Chloride causes pitting corrosion in stainless boilers (LM caps it at 30 ppm; th
 
 Opens with `?tab=pourover`. No boiler to protect, so the spec is taste and the base is tap water.
 
-- **Coffee** picks a target. Roast sets hardness (GH) and alkalinity (KH); process only nudges alkalinity, because nobody publishes process-specific hardness.
+- **Coffee** picks a target. Roast sets hardness and alkalinity; process only nudges alkalinity, because nobody publishes process-specific hardness.
 - **Water** picks the base (Cedar tap, Tolt tap, distilled) and lets the sliders leave the preset.
-- **Recipe** is in mL of the espresso tab's Concentrates A and B. Salts only add, so a target below the tap cuts the tap with distilled first.
+- **Recipe** is in mL of two stock solutions: 7.0 g Epsom salt in 1 L distilled, and 3.0 g baking soda in 1 L distilled. That is a tenth the strength of the espresso concentrates, so a 12 oz dose lands in whole millilitres. Salts only add, so a target below the tap cuts the tap with distilled first.
 - **Where it sits** plots this water against Seattle tap and the published recipes.
 
-| Roast | GH | KH | Evidence |
+| Roast | Hardness | Alkalinity | Evidence |
 | --- | --- | --- | --- |
 | Light | 70 | 25 | Practitioner recipes (Lotus, Rao) |
 | Medium | 70 | 40 | SCA standard |
 | Dark | 50 | 40 | Disputed — vendors disagree on direction |
 
-| Process | KH nudge | Evidence |
+| Process | Alkalinity nudge | Evidence |
 | --- | --- | --- |
 | Washed, honey, blend | +0 | Washed is the published baseline; the rest inferred |
 | Natural | +5 | Inferred |
@@ -67,9 +67,9 @@ Opens with `?tab=pourover`. No boiler to protect, so the spec is taste and the b
 | `roast` | `light` `medium` `dark` | `light` |
 | `process` | `washed` `honey` `natural` `anaerobic` `coferment` `blend` | `washed` |
 | `base` | `cedar` `tolt` `distilled` | `cedar` |
-| `gh` | 20–140 | the preset |
-| `kh` | 5–80 | the preset |
-| `liters` | 0.5–8, step 0.5 | 1 |
+| `gh` (hardness) | 20–140 | the preset |
+| `kh` (alkalinity) | 5–80 | the preset |
+| `oz` (brew water) | 12–128, step 4 | 12 |
 
 `gh` and `kh` are written only when the sliders are off the preset. Each tab owns the query string while it is showing, so a link carries one profile.
 

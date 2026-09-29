@@ -228,9 +228,7 @@
     min-height: 40px; padding: 8px 12px; cursor: pointer; border-radius: 0;
     background: var(--surface); color: var(--ink); border: 2px solid var(--line);
   }
-  .chip small { color: var(--muted); font-weight: 500; font-size: 0.75rem; margin-left: 6px; font-variant-numeric: tabular-nums; }
   .chip[aria-checked="true"] { background: var(--accent); color: #fff; box-shadow: 3px 3px 0 var(--shadow); }
-  .chip[aria-checked="true"] small { color: rgba(255,255,255,0.85); }
   .chip:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
   .preset {
     display: flex; align-items: baseline; justify-content: space-between; gap: 6px 16px; flex-wrap: wrap;
@@ -242,6 +240,10 @@
   .basis-head { display: flex; align-items: center; gap: 4px 12px; flex-wrap: wrap; font-size: 0.9rem; }
   .basis-head .sets { font-variant-numeric: tabular-nums; color: var(--ink-2); white-space: nowrap; margin-right: auto; }
   .basis p { color: var(--ink-2); font-size: 0.85rem; margin-top: 4px; }
+  .steps { margin: 0 0 18px 1.3em; font-size: 0.92rem; }
+  .steps li { margin-bottom: 8px; padding-left: 4px; }
+  .steps li::marker { font-weight: 700; color: var(--accent); }
+  .conc-note a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent); }
   .base-line { font-size: 0.95rem; margin-bottom: 16px; }
   .base-line b { font-variant-numeric: tabular-nums; }
   .base-line .why { display: block; color: var(--muted); font-size: 0.8rem; margin-top: 2px; }
@@ -253,7 +255,7 @@
   .badge.note { color: var(--ink-2); background: transparent; border: 1px solid var(--muted); }
   .badge.weak { color: var(--ink); background: var(--accent-2); border: 1px solid var(--accent); }
 
-  /* ---- pourover: GH/KH map ---- */
+  /* ---- pourover: hardness / alkalinity map ---- */
   .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.78rem; color: var(--ink-2); margin-bottom: 8px; }
   .legend span { display: inline-flex; align-items: center; gap: 6px; }
   .k-tap { fill: var(--c-tap); }
@@ -354,15 +356,15 @@
       <div class="dose">
         <div class="salt">Epsom salt · MgSO₄·7H₂O</div>
         <div class="grams"><span id="epsomG">0.70</span> <small>g</small></div>
-        <div class="conc">or <b id="epsomMl">10.0</b> mL of Concentrate A</div>
+        <div class="conc">or <b id="epsomMl">10.0</b> mL of Epsom salt concentrate</div>
       </div>
       <div class="dose">
         <div class="salt">Baking soda · NaHCO₃</div>
         <div class="grams"><span id="sodaG">0.30</span> <small>g</small></div>
-        <div class="conc">or <b id="sodaMl">10.0</b> mL of Concentrate B</div>
+        <div class="conc">or <b id="sodaMl">10.0</b> mL of baking soda concentrate</div>
       </div>
     </div>
-    <p class="conc-note"><b>Concentrates</b> (accuracy fix for 0.1 g scales): A = 35.0 g Epsom in 500 mL distilled (70 mg/mL) · B = 15.0 g baking soda in 500 mL distilled (30 mg/mL). Keep them in separate bottles — mixed concentrate slowly precipitates magnesium carbonate. Dissolve Epsom first, then baking soda.</p>
+    <p class="conc-note"><b>Concentrates</b> (accuracy fix for 0.1 g scales): Epsom salt concentrate = 35.0 g Epsom salt in 500 mL distilled (70 mg/mL) · baking soda concentrate = 15.0 g baking soda in 500 mL distilled (30 mg/mL). Keep them in separate bottles — mixed concentrate slowly precipitates magnesium carbonate. Dissolve Epsom first, then baking soda.</p>
     <div class="share-row">
       <button type="button" class="share-btn" id="shareBtn">Copy share link</button>
       <p class="share-note" id="shareNote"></p>
@@ -406,8 +408,8 @@
   <header>
     <span class="kicker">Seattle tap · Cedar + Tolt</span>
     <h1>Pourover Water <span class="accent">Profile</span></h1>
-    <p class="sub">Seattle tap is soft — about 26 ppm hardness, 1 mg/L magnesium. Pick the coffee; the same two
-      concentrates from the espresso tab bring carbon-filtered tap up to the target.</p>
+    <p class="sub">Seattle tap is soft — about 26 ppm hardness, 1 mg/L magnesium. Pick the coffee; two stock
+      solutions, Epsom salt and baking soda, bring carbon-filtered tap up to the target.</p>
   </header>
 
   <section class="card">
@@ -442,7 +444,7 @@
     </div>
     <div class="slider-row">
       <div class="slider-head">
-        <label for="pGh">Total hardness (GH)</label>
+        <label for="pGh">Total hardness</label>
         <span class="val"><span id="pGhVal">70</span><small>ppm as CaCO₃</small></span>
       </div>
       <input type="range" id="pGh" min="20" max="140" step="1" value="70">
@@ -450,7 +452,7 @@
     </div>
     <div class="slider-row">
       <div class="slider-head">
-        <label for="pKh">Alkalinity (KH, buffer)</label>
+        <label for="pKh">Alkalinity (buffer)</label>
         <span class="val"><span id="pKhVal">25</span><small>ppm as CaCO₃</small></span>
       </div>
       <input type="range" id="pKh" min="5" max="80" step="1" value="25">
@@ -458,11 +460,11 @@
     </div>
     <div class="slider-row">
       <div class="slider-head">
-        <label for="pLiters">Batch size</label>
-        <span class="val"><span id="pLitersVal">1</span><small>L (<span id="pGal">0.26</span> gal)</small></span>
+        <label for="pOz">Brew water</label>
+        <span class="val"><span id="pOzVal">12</span><small>oz (<span id="pMetric">355 mL</span>)</small></span>
       </div>
-      <input type="range" id="pLiters" min="0.5" max="8" step="0.5" value="1">
-      <div class="range-hint"><span>0.5 L</span><span>8 L</span></div>
+      <input type="range" id="pOz" min="12" max="128" step="4" value="12">
+      <div class="range-hint"><span>12 oz · one pourover</span><span>128 oz · 1 gal</span></div>
     </div>
     <div class="share-row" id="pResetRow" hidden>
       <button type="button" class="share-btn" id="pReset">Reset to preset</button>
@@ -475,22 +477,45 @@
     <p class="base-line" id="pBaseLine"></p>
     <div class="recipe-grid">
       <div class="dose">
-        <div class="salt">Concentrate A · Epsom salt</div>
+        <div class="salt">Epsom salt solution</div>
         <div class="grams"><span id="pEpsomMl">0</span> <small>mL</small></div>
-        <div class="conc"><b id="pEpsomG">0</b> g MgSO₄·7H₂O · adds <b id="pAddGh">0</b> ppm GH</div>
+        <div class="conc">adds <b id="pAddGh">0</b> ppm hardness</div>
       </div>
       <div class="dose">
-        <div class="salt">Concentrate B · Baking soda</div>
+        <div class="salt">Baking soda solution</div>
         <div class="grams"><span id="pSodaMl">0</span> <small>mL</small></div>
-        <div class="conc"><b id="pSodaG">0</b> g NaHCO₃ · adds <b id="pAddKh">0</b> ppm KH</div>
+        <div class="conc">adds <b id="pAddKh">0</b> ppm alkalinity</div>
       </div>
     </div>
-    <p class="conc-note"><b>Same bottles as the espresso tab:</b> A = 35.0 g Epsom in 500 mL distilled · B = 15.0 g baking soda in 500 mL distilled. <span id="pSmallDose"></span></p>
-    <p class="conc-note"><b>Carbon-filter the tap first.</b> Seattle disinfects with free chlorine (0.4–1.0 mg/L at the tap), not chloramine, so plain carbon removes it. Pitcher filters with ion-exchange resin also pull hardness and alkalinity, which makes the tap numbers here read high.</p>
+    <p class="conc-note"><b>1 mL weighs 1 g</b>, so a syringe or the coffee scale both work. The two solutions are in <a href="#howto">How to dose</a>.</p>
     <div class="share-row">
       <button type="button" class="share-btn" id="pShareBtn">Copy share link</button>
       <p class="share-note" id="pShareNote"></p>
     </div>
+  </section>
+
+  <section class="card" id="howto">
+    <h2>How to dose</h2>
+    <ol class="steps">
+      <li><b>Mix two stock solutions, once.</b> Epsom salt solution: 7.0 g Epsom salt in 1 L distilled water. Baking soda solution: 3.0 g baking soda in 1 L distilled water. Separate bottles.</li>
+      <li><b>Measure the brew water</b> into the kettle, carbon-filtered.</li>
+      <li><b>Add each solution</b> by syringe, or by weight with the kettle on the coffee scale.</li>
+      <li><b>Swirl, then heat.</b> Both salts are already dissolved.</li>
+    </ol>
+    <div class="table-scroll">
+      <table class="tight">
+        <thead><tr><th>Method</th><th>This dose</th><th>Verdict</th></tr></thead>
+        <tbody>
+          <tr><td>Sprinkle dry</td><td class="num"><span id="pDryEpsom">0</span> mg Epsom salt<br><span id="pDrySoda">0</span> mg baking soda</td><td id="pDryVerdict"></td></tr>
+          <tr><td>Slurry or paste</td><td class="num">same</td><td>Same weighing problem; neither salt needs help dissolving</td></tr>
+          <tr><td>Stock solution</td><td class="num"><span id="pWetEpsom">0</span> g<br><span id="pWetSoda">0</span> g</td><td><span class="badge ok">✓ weighable</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="conc-note"><b>Already have the espresso tab's concentrates?</b> 100 mL of either, topped up to 1 L with distilled water, makes the same solution.</p>
+    <p class="conc-note"><b>Carbon-filter the tap first.</b> Seattle disinfects with free chlorine (0.4–1.0 mg/L at the tap), not chloramine, so plain carbon removes it. Pitcher filters with ion-exchange resin also pull hardness and alkalinity, which makes the tap numbers here read high.</p>
+    <p class="conc-note"><b>Storage.</b> Keep both capped and out of the sun. Remake one if it turns cloudy.</p>
+    <p class="conc-note"><b>Comparing two waters.</b> Small tests found minerals stirred into the brewed cup taste close to minerals in the brew water. Brew once on straight tap, split it, and dose one cup.</p>
   </section>
 
   <section class="card">
@@ -499,14 +524,14 @@
       <span><svg width="14" height="14"><rect x="2" y="2" width="10" height="10" class="k-tap"/></svg>Seattle tap</span>
       <span><svg width="14" height="14"><path d="M7 0.5 13.5 7 7 13.5 0.5 7Z" class="k-target"/></svg>This water</span>
       <span><svg width="14" height="14"><circle cx="7" cy="7" r="4.5" class="k-ref"/></svg>Published recipe</span>
-      <span><svg width="14" height="14"><rect x="1" y="1" width="12" height="12" class="k-sca"/></svg>SCA range</span>
+      <span><svg width="14" height="14"><rect x="1" y="1" width="12" height="12" class="k-sca"/></svg>Specialty Coffee Association range</span>
     </div>
     <div class="map" id="pMap"></div>
     <details class="table-view">
       <summary>Table view</summary>
       <div class="table-scroll">
         <table>
-          <thead><tr><th>Water</th><th>GH</th><th>KH</th><th>Evidence</th></tr></thead>
+          <thead><tr><th>Water</th><th>Hardness</th><th>Alkalinity</th><th>Evidence</th></tr></thead>
           <tbody id="pRefRows"></tbody>
         </table>
       </div>
@@ -532,7 +557,7 @@
         </tbody>
       </table>
     </div>
-    <p class="conc-note">Tap columns: mean of 10 quarterly Seattle Public Utilities samples at in-city distribution points, Feb 2024 – May 2026. Hardness is calculated from calcium and magnesium. North-east Seattle sits on the Cedar/Tolt boundary and gets switched between them; the two dose within 5 ppm of each other.</p>
+    <p class="conc-note">SCA = Specialty Coffee Association; SCAA = its American predecessor. Tap columns: mean of 10 quarterly Seattle Public Utilities samples at in-city distribution points, Feb 2024 – May 2026. Hardness is calculated from calcium and magnesium. North-east Seattle sits on the Cedar/Tolt boundary and gets switched between them; the two dose within 5 ppm of each other.</p>
   </section>
 
   <section class="card">
@@ -553,10 +578,10 @@
       <table class="tight">
         <thead><tr><th>Cup tastes</th><th>Move</th><th>Step</th></tr></thead>
         <tbody>
-          <tr><td>Sour, sharp, thin</td><td>Alkalinity up</td><td class="num">+5 to +10 KH</td></tr>
-          <tr><td>Flat, chalky, dull fruit</td><td>Alkalinity down</td><td class="num">−5 to −10 KH</td></tr>
-          <tr><td>Hollow, watery, low sweetness</td><td>Hardness up</td><td class="num">+10 to +20 GH</td></tr>
-          <tr><td>Heavy, drying, bitter finish</td><td>Hardness down</td><td class="num">−10 to −20 GH</td></tr>
+          <tr><td>Sour, sharp, thin</td><td>Alkalinity up</td><td class="num">+5 to +10 ppm</td></tr>
+          <tr><td>Flat, chalky, dull fruit</td><td>Alkalinity down</td><td class="num">−5 to −10 ppm</td></tr>
+          <tr><td>Hollow, watery, low sweetness</td><td>Hardness up</td><td class="num">+10 to +20 ppm</td></tr>
+          <tr><td>Heavy, drying, bitter finish</td><td>Hardness down</td><td class="num">−10 to −20 ppm</td></tr>
         </tbody>
       </table>
     </div>
@@ -576,7 +601,7 @@
           <tr><td>Roast</td><td>Vendors only</td><td>Alkalinity up from light to medium; dark is split</td><td><span class="badge note">Vendor</span></td></tr>
           <tr><td>Process</td><td>Almost none</td><td>One vendor shifts magnesium toward calcium for naturals</td><td><span class="badge weak">Inferred</span></td></tr>
           <tr><td>Variety / origin</td><td>None</td><td>Brewers Cup winners tune by taste; winning waters span 40–110 dissolved solids</td><td><span class="badge note">Practitioner</span></td></tr>
-          <tr><td>Roaster's water</td><td>Some</td><td>Roasters roast to their own water: Oslo tap is 41 / 32</td><td><span class="badge note">Practitioner</span></td></tr>
+          <tr><td>Roaster's water</td><td>Some</td><td>Roasters roast to their own water: Oslo tap is hardness 41, alkalinity 32</td><td><span class="badge note">Practitioner</span></td></tr>
         </tbody>
       </table>
     </div>
@@ -584,8 +609,8 @@
 
   <footer>
     <p><b>Why Epsom only for hardness?</b> Tap already supplies the calcium (9 mg/L). Magnesium is what Seattle lacks, and blind tests disagree on which way magnesium versus calcium pushes flavor, so there's no evidence-backed reason to add a third salt. Sulfate lands far under its taste threshold.</p>
+    <p><b>Why a weaker solution than the espresso tab?</b> One pourover needs about a tenth of a gallon, so the stock is a tenth the strength. The dose stays large enough to measure.</p>
     <p><b>Target below tap?</b> Salts only add. When a target is under the tap's hardness or alkalinity, the recipe cuts the tap with distilled first, then doses.</p>
-    <p><b>Process counts</b> on the chips are offerings across the roasters in the untamped graph, Sep 2026. Roast level isn't recorded there.</p>
     <p>Sources:
       <a href="https://www.seattle.gov/utilities/your-services/water/water-quality/analyses">Seattle Public Utilities water analyses</a> ·
       <a href="https://coffeegeek.com/wp-content/uploads/2023/10/SCAGoldCupStandard.pdf">SCA Standard 310-2021</a> ·
@@ -609,14 +634,14 @@
   const MW = { epsom: 246.47, mg: 24.305, so4: 96.06, soda: 84.007, caco3: 100.087 };
   const H_FACT = MW.caco3 / MW.epsom;        // ppm hardness per mg/L Epsom
   const A_FACT = (MW.caco3 / 2) / MW.soda;   // ppm alkalinity per mg/L NaHCO3
-  const CONC_A = 70, CONC_B = 30;            // mg salt per mL of concentrate
+  const CONC_A = 70, CONC_B = 30;            // mg salt per mL of espresso concentrate (Epsom, baking soda)
 
   const $ = id => document.getElementById(id);
 
   // Each tab owns the query string while it's showing, so a shared link only
   // ever carries the params of the profile it describes.
   const ESP_KEYS = ['hardness', 'alkalinity', 'batch'];
-  const POUR_KEYS = ['tab', 'roast', 'process', 'base', 'gh', 'kh', 'liters'];
+  const POUR_KEYS = ['tab', 'roast', 'process', 'base', 'gh', 'kh', 'oz', 'liters'];
   let activeTab = 'espresso';
   const clamp01 = x => Math.max(0, Math.min(1, x));
 
@@ -787,10 +812,14 @@
   $('shareBtn').addEventListener('click', () => copyShareLink($('shareBtn')));
 
   /* =========================== POUROVER ===========================
-     Same two concentrates, different problem: there's no boiler to protect,
-     so the spec is taste, and the base is Seattle tap rather than distilled.
+     Same two salts, different problem: there's no boiler to protect, so the
+     spec is taste, and the base is Seattle tap rather than distilled. Doses
+     are for one kettle, so the stock solutions are a tenth the strength of
+     the espresso concentrates — a 12 oz dose then lands in whole millilitres.
      Tap values are means of 10 quarterly SPU samples at in-city distribution
      points (Feb 2024 – May 2026); hardness is 2.497·Ca + 4.118·Mg. */
+  const SOL_EPSOM = 7, SOL_SODA = 3;          // mg salt per mL of pourover stock solution
+  const ML_PER_OZ = 29.5735;
   const TAP = {
     cedar:     { label: 'Cedar tap', short: 'Cedar', gh: 27, kh: 25, ca: 9.0, mg: 1.1, na: 2.5, so4: 2.0, cl: 3.7, tds: 48 },
     tolt:      { label: 'Tolt tap',  short: 'Tolt',  gh: 25, kh: 20, ca: 9.3, mg: 0.4, na: 1.1, so4: 1.7, cl: 3.3, tds: 41 },
@@ -801,35 +830,35 @@
   // with a measured mechanism, and nobody publishes process-specific hardness.
   const ROASTS = {
     light:  { label: 'Light',  gh: 70, kh: 25, tier: 'Practitioner', cls: 'note',
-              basis: 'Lotus Light and Bright 60 / 25 · Rao (updated) 72 / 20 · Lotus Bright and Juicy 72 / 18' },
+              basis: 'Published recipes, as hardness / alkalinity: Lotus Light and Bright 60 / 25 · Rao (updated) 72 / 20 · Lotus Bright and Juicy 72 / 18' },
     medium: { label: 'Medium', gh: 70, kh: 40, tier: 'Standard', cls: 'ok',
-              basis: 'SCA 68 / 40 · Barista Hustle 81 / 40 · Rao/Perger 90 / 42' },
+              basis: 'Published recipes, as hardness / alkalinity: Specialty Coffee Association 68 / 40 · Barista Hustle 81 / 40 · Rao/Perger 90 / 42' },
     dark:   { label: 'Dark',   gh: 50, kh: 40, tier: 'Disputed', cls: 'weak',
-              basis: 'Hardness down per Apax Lab and Barista Hustle. Alkalinity is split — Third Wave Water and Empirical raise it, Barista Hustle lowers it — so it holds at SCA’s 40.' },
+              basis: 'Hardness down per Apax Lab and Barista Hustle. Alkalinity is split — Third Wave Water and Empirical raise it, Barista Hustle lowers it — so it holds at the Specialty Coffee Association’s 40.' },
   };
   const PROCESSES = {
-    washed:    { label: 'Washed', n: 665, dkh: 0, tier: 'Practitioner', cls: 'note',
+    washed:    { label: 'Washed', dkh: 0, tier: 'Practitioner', cls: 'note',
                  basis: 'Baseline. Lotus Bright and Juicy (72 / 18) is published for light washed coffees.' },
-    honey:     { label: 'Honey', n: 147, dkh: 0, tier: 'Inferred', cls: 'weak',
+    honey:     { label: 'Honey', dkh: 0, tier: 'Inferred', cls: 'weak',
                  basis: 'No published numbers. Treated as washed.' },
-    natural:   { label: 'Natural', n: 546, dkh: 5, tier: 'Inferred', cls: 'weak',
+    natural:   { label: 'Natural', dkh: 5, tier: 'Inferred', cls: 'weak',
                  basis: 'No published hardness or alkalinity difference. +5 buffer for winey acidity.' },
-    anaerobic: { label: 'Anaerobic / carbonic', n: 296, dkh: 10, tier: 'Inferred', cls: 'weak',
+    anaerobic: { label: 'Anaerobic / carbonic', dkh: 10, tier: 'Inferred', cls: 'weak',
                  basis: 'No published numbers. +10 buffer rounds lactic and acetic sharpness.' },
-    coferment: { label: 'Thermal shock / co-ferment', n: 155, dkh: 10, tier: 'Inferred', cls: 'weak',
+    coferment: { label: 'Thermal shock / co-ferment', dkh: 10, tier: 'Inferred', cls: 'weak',
                  basis: 'No published numbers. +10 buffer, same reasoning as anaerobic.' },
-    blend:     { label: 'Blend / not stated', n: null, dkh: 0, tier: 'Inferred', cls: 'weak',
+    blend:     { label: 'Blend / not stated', dkh: 0, tier: 'Inferred', cls: 'weak',
                  basis: 'Roast alone sets the target.' },
   };
 
-  // [name, KH, GH, evidence, direct label, label side, label priority]
+  // [name, alkalinity, hardness, evidence, direct label, label side, label priority]
   // Priority 1 labels always show; priority 2 only when the plot is wide enough.
   const REFS = [
-    ['SCA standard (2009)',        40,   68,   'Standard',     'SCA',                'r', 2],
+    ['SCA standard (2009)',        40,   68,   'Standard',     'SCA standard',       'r', 2],
     ['Barista Hustle',             40.1, 80.7, 'Practitioner', 'Barista Hustle',     'r', 2],
     ['Rao/Perger',                 42,   90,   'Practitioner', 'Rao/Perger',         'r', 1],
     ['Hendon (Barista Hustle #6)', 30.8, 99.9, 'Practitioner', 'Hendon',             'l', 2],
-    ['World of Coffee Budapest',   40.1, 51.2, 'Practitioner', 'WOC Budapest',       'r', 2],
+    ['World of Coffee Budapest',   40.1, 51.2, 'Practitioner', 'World of Coffee Budapest', 'r', 2],
     ['Third Wave Water Classic',   40,   130,  'Third-party',  'Third Wave Classic', 'r', 2],
     ['Rao, updated (Lotus)',       20.1, 72.3, 'Practitioner'],
     ['Lotus Bright and Juicy',     18,   72,   'Practitioner'],
@@ -844,7 +873,7 @@
   const P_FIELDS = [
     { id: 'pGh',     param: 'gh',     min: 20,  max: 140, step: 1   },
     { id: 'pKh',     param: 'kh',     min: 5,   max: 80,  step: 1   },
-    { id: 'pLiters', param: 'liters', min: 0.5, max: 8,   step: 0.5, def: 1 },
+    { id: 'pOz',     param: 'oz',     min: 12,  max: 128, step: 4,   def: 12 },
   ];
   const P_DEF = { roast: 'light', process: 'washed', base: 'cedar' };
   const pick = { roast: P_DEF.roast, process: P_DEF.process, base: P_DEF.base };
@@ -864,11 +893,6 @@
       b.setAttribute('role', 'radio');
       b.dataset.key = k;
       b.textContent = options[k].label;
-      if (options[k].n) {
-        const s = document.createElement('small');
-        s.textContent = options[k].n;
-        b.appendChild(s);
-      }
       b.addEventListener('click', () => onPick(k));
       host.appendChild(b);
     });
@@ -923,7 +947,7 @@
   ];
   const band = (v, lo, hi) => v < lo ? 0 : v <= hi ? 1 : 2;
 
-  /* ---------- GH/KH map ---------- */
+  /* ---------- hardness / alkalinity map ---------- */
   const SVG_NS = 'http://www.w3.org/2000/svg';
   function svg(name, attrs, text) {
     const n = document.createElementNS(SVG_NS, name);
@@ -937,7 +961,7 @@
   function showTip(host, x, y, d) {
     if (!tip) { tip = document.createElement('div'); tip.className = 'map-tip'; }
     tip.textContent = '';
-    const b = document.createElement('b'); b.textContent = 'GH ' + r1(d.gh) + ' / KH ' + r1(d.kh);
+    const b = document.createElement('b'); b.textContent = 'Hardness ' + r1(d.gh) + ' · Alkalinity ' + r1(d.kh);
     const s = document.createElement('span'); s.textContent = d.name;
     const e = document.createElement('em'); e.textContent = d.tier;
     tip.append(b, s, e);
@@ -975,8 +999,8 @@
       root.appendChild(svg('line', { class: 'grid', x1: X(k), x2: X(k), y1: m.t, y2: H - m.b }));
       root.appendChild(svg('text', { class: 'axis-t', x: X(k), y: H - m.b + 16, 'text-anchor': 'middle' }, k));
     }
-    root.appendChild(svg('text', { class: 'axis-l', x: m.l, y: H - 6 }, 'Alkalinity (KH) →'));
-    root.appendChild(svg('text', { class: 'axis-l', x: 0, y: 12 }, '↑ Hardness (GH)'));
+    root.appendChild(svg('text', { class: 'axis-l', x: m.l, y: H - 6 }, 'Alkalinity, ppm →'));
+    root.appendChild(svg('text', { class: 'axis-l', x: 0, y: 12 }, '↑ Hardness, ppm'));
 
     const marks = [];
     // side: l / r beside the mark, a / b centred above / below it
@@ -1061,13 +1085,14 @@
   }
 
   /* ---------- render ---------- */
-  const fmtMl = v => v === 0 ? '0' : v >= 10 ? v.toFixed(1) : v.toFixed(2);
-  const fmtG = v => v === 0 ? '0' : v < 1 ? v.toFixed(3) : v.toFixed(2);
+  const fmtMl = v => v === 0 ? '0' : v.toFixed(1);
+  const metric = ml => ml < 1000 ? Math.round(ml) + ' mL' : (ml / 1000).toFixed(2) + ' L';
   const fmt1 = v => v >= 100 ? String(Math.round(v)) : v.toFixed(1);
   const tierBadge = o => '<span class="badge ' + o.cls + '">' + o.tier + '</span>';
 
   function renderPour() {
-    const gh = +$('pGh').value, kh = +$('pKh').value, L = +$('pLiters').value;
+    const gh = +$('pGh').value, kh = +$('pKh').value, oz = +$('pOz').value;
+    const mlTotal = oz * ML_PER_OZ, L = mlTotal / 1000;
     const b = TAP[pick.base];
     const r = ROASTS[pick.roast], pr = PROCESSES[pick.process], pre = preset();
 
@@ -1075,20 +1100,20 @@
     paintChips('processChips', pick.process);
     paintChips('baseChips', pick.base);
     $('presetName').textContent = r.label + ' · ' + pr.label;
-    $('presetNums').textContent = 'GH ' + pre.gh + ' / KH ' + pre.kh;
+    $('presetNums').textContent = 'Hardness ' + pre.gh + ' · Alkalinity ' + pre.kh;
     $('basisRoastName').textContent = r.label + ' roast';
-    $('basisRoastSets').textContent = 'GH ' + r.gh + ' · KH ' + r.kh;
+    $('basisRoastSets').textContent = 'Hardness ' + r.gh + ' · Alkalinity ' + r.kh;
     $('basisRoast').textContent = r.basis;
     $('basisRoastTier').innerHTML = tierBadge(r);
     $('basisProcName').textContent = pr.label;
-    $('basisProcSets').textContent = 'KH +' + pr.dkh;
+    $('basisProcSets').textContent = 'Alkalinity +' + pr.dkh;
     $('basisProc').textContent = pr.basis;
     $('basisProcTier').innerHTML = tierBadge(pr);
 
     $('pGhVal').textContent = gh;
     $('pKhVal').textContent = kh;
-    $('pLitersVal').textContent = L;
-    $('pGal').textContent = (L / L_PER_GAL).toFixed(2);
+    $('pOzVal').textContent = oz;
+    $('pMetric').textContent = metric(mlTotal);
     $('pGhHint').textContent = pick.base === 'distilled' ? 'distilled 0' : b.short + ' tap ' + b.gh;
     $('pKhHint').textContent = pick.base === 'distilled' ? 'distilled 0' : b.short + ' tap ' + b.kh;
     $('pResetRow').hidden = gh === pre.gh && kh === pre.kh;
@@ -1098,27 +1123,29 @@
     const f = Math.min(1, b.gh ? gh / b.gh : 1, b.kh ? kh / b.kh : 1);
     const addGh = Math.max(0, gh - f * b.gh), addKh = Math.max(0, kh - f * b.kh);
     const epsomMgL = addGh / H_FACT, sodaMgL = addKh / A_FACT;
-    const epsomG = epsomMgL * L / 1000, sodaG = sodaMgL * L / 1000;
-    const epsomMl = epsomG * 1000 / CONC_A, sodaMl = sodaG * 1000 / CONC_B;
+    const epsomMg = epsomMgL * L, sodaMg = sodaMgL * L;
+    const epsomMl = epsomMg / SOL_EPSOM, sodaMl = sodaMg / SOL_SODA;
 
-    const ml = v => Math.round(v * L * 1000);
+    const vol = '<b>' + oz + ' oz</b> (' + metric(mlTotal) + ')';
     let base;
-    if (pick.base === 'distilled') base = 'Into <b>' + L + ' L</b> distilled water:';
-    else if (f >= 0.999) base = 'Into <b>' + L + ' L</b> carbon-filtered ' + b.short + ' tap:';
-    else base = 'Into <b>' + ml(f) + ' mL</b> carbon-filtered ' + b.short + ' tap + <b>' + ml(1 - f) + ' mL</b> distilled:' +
-      '<span class="why">The target is below the tap, so the tap is cut first.</span>';
+    if (pick.base === 'distilled') base = 'Into ' + vol + ' of distilled water:';
+    else if (f >= 0.999) base = 'Into ' + vol + ' of carbon-filtered ' + b.short + ' tap:';
+    else base = 'Into <b>' + metric(f * mlTotal) + '</b> carbon-filtered ' + b.short + ' tap + <b>' + metric((1 - f) * mlTotal) + '</b> distilled:' +
+      '<span class="why">' + oz + ' oz total. The target is below the tap, so the tap is cut first.</span>';
     $('pBaseLine').innerHTML = base;
 
     $('pEpsomMl').textContent = fmtMl(epsomMl);
     $('pSodaMl').textContent = fmtMl(sodaMl);
-    $('pEpsomG').textContent = fmtG(epsomG);
-    $('pSodaG').textContent = fmtG(sodaG);
     $('pAddGh').textContent = Math.round(addGh);
     $('pAddKh').textContent = Math.round(addKh);
-    const tiny = [epsomMl, sodaMl].some(v => v > 0 && v < 0.5);
-    $('pSmallDose').textContent = tiny
-      ? 'A dose under 0.5 mL is hard to measure: mix a bigger batch, or dilute that concentrate 1:10 and dose ten times the volume.'
-      : '';
+    $('pDryEpsom').textContent = Math.round(epsomMg);
+    $('pDrySoda').textContent = Math.round(sodaMg);
+    const dry = Math.max(epsomMg, sodaMg);
+    $('pDryVerdict').textContent = dry === 0 ? 'Nothing to add'
+      : dry < 100 ? 'Below what a 0.1 g scale reads'
+      : 'A 0.1 g scale is off by up to ' + Math.round(10000 / dry) + '%';
+    $('pWetEpsom').textContent = fmtMl(epsomMl);
+    $('pWetSoda').textContent = fmtMl(sodaMl);
 
     // what's in it
     const MG_PER = MW.mg / MW.caco3, SO4_PER = MW.so4 / MW.caco3, NA_PER = 22.99 / (MW.caco3 / 2);
@@ -1148,11 +1175,12 @@
 
     syncPourUrl();
     $('pShareNote').innerHTML =
-      'This page’s link now encodes <b>' + r.label + ' · ' + pr.label + '</b> at <b>GH ' + gh + ' / KH ' + kh + '</b> — ' +
-      '<b>' + fmtMl(epsomMl) + ' mL</b> A + <b>' + fmtMl(sodaMl) + ' mL</b> B per <b>' + L + ' L</b>.';
+      'This page’s link now encodes <b>' + r.label + ' · ' + pr.label + '</b> at <b>hardness ' + gh + ', alkalinity ' + kh + '</b> — ' +
+      '<b>' + fmtMl(epsomMl) + ' mL</b> Epsom salt solution + <b>' + fmtMl(sodaMl) + ' mL</b> baking soda solution per <b>' + oz + ' oz</b>.';
   }
 
-  /* ---------- URL: ?tab=pourover&roast=&process=&base=&gh=&kh=&liters= ----------
+  /* ---------- URL: ?tab=pourover&roast=&process=&base=&gh=&kh=&oz= ----------
+     (gh / kh = hardness / alkalinity; the espresso tab already owns those names)
      gh/kh are written only when the sliders are off the preset, so a link that
      names a coffee keeps tracking the preset if the preset is ever retuned. */
   function applyPourUrl() {
@@ -1180,7 +1208,7 @@
       else url.searchParams.set(k, pick[k]);
     });
     const pre = preset();
-    const defs = { gh: pre.gh, kh: pre.kh, liters: 1 };
+    const defs = { gh: pre.gh, kh: pre.kh, oz: 12 };
     P_FIELDS.forEach(f => {
       const v = +$(f.id).value;
       if (v === defs[f.param]) url.searchParams.delete(f.param);
