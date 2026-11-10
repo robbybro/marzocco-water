@@ -208,6 +208,8 @@
     display: inline; background: linear-gradient(transparent 62%, var(--accent-2) 62%);
   }
   .profile-desc { color: var(--ink-2); font-size: 0.92rem; margin: 10px 0 20px; }
+  .milk-note { font-size: 0.92rem; margin: -6px 0 20px; padding: 10px 12px; border: 2px solid var(--hairline); }
+  .milk-note b { text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.8rem; margin-right: 6px; }
   .meter-row { display: grid; grid-template-columns: 150px 1fr; gap: 12px; align-items: center; margin-bottom: 14px; }
   @media (max-width: 560px) {
     .meter-row { grid-template-columns: 1fr; gap: 5px; margin-bottom: 16px; }
@@ -399,6 +401,7 @@
     <h2>In the cup</h2>
     <span class="profile-name" id="profileName">House Balance</span>
     <p class="profile-desc" id="profileDesc"></p>
+    <p class="milk-note" id="milkNote"></p>
     <div class="meter-row"><span class="m-label">Acidity / brightness</span><div class="meter-track"><div class="meter-fill" id="mAcidity"></div></div></div>
     <div class="meter-row"><span class="m-label">Sweetness</span><div class="meter-track"><div class="meter-fill" id="mSweet"></div></div></div>
     <div class="meter-row"><span class="m-label">Body</span><div class="meter-track"><div class="meter-fill" id="mBody"></div></div></div>
@@ -756,6 +759,20 @@
     (lit || chips.find(b => b.getAttribute('aria-disabled') !== 'true')).tabIndex = 0;
   }
 
+  // In milk: alkalinity decides the verdict (it is the measured lever — it
+  // neutralizes the acids that carry fruit through milk); hardness only adds
+  // the body clause, from the same directional model as HARDNESS_DESC.
+  const MILK_VERDICT = [
+    ['Good', 'Low alkalinity keeps the fruit readable through milk.'],
+    ['OK', 'The fruit is quieter in milk. Alkalinity in the high 40s keeps more of it.'],
+    ['Poor', 'High alkalinity flattens the acidity, so fruit-forward coffees go flat in milk. Lower the alkalinity for milk drinks.'],
+  ];
+  const MILK_BODY = [
+    'Body is on the light side, so it shows best in a small drink.',
+    'Medium body.',
+    'Heavier body holds up in a bigger drink.',
+  ];
+
   function render() {
     const h = +$('hardness').value;
     const a = +$('alkalinity').value;
@@ -805,6 +822,8 @@
     $('profileName').textContent = PROFILE_NAMES[th][ta];
     $('profileDesc').textContent = HARDNESS_DESC[th] + ' ' + ALK_DESC[ta];
     paintShortcuts(th, ta);
+    $('milkNote').innerHTML = '<b>In milk: ' + MILK_VERDICT[ta][0] + '</b>' +
+      MILK_VERDICT[ta][1] + ' ' + MILK_BODY[th];
 
     syncUrl();
     $('shareNote').innerHTML =
