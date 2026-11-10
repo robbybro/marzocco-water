@@ -230,6 +230,8 @@
   }
   .chip[aria-checked="true"] { background: var(--accent); color: #fff; box-shadow: 3px 3px 0 var(--shadow); }
   .chip:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+  .chip[aria-disabled="true"] { cursor: not-allowed; color: var(--muted); border-style: dashed; }
+  .chip-note { color: var(--muted); font-size: 0.82rem; margin: 10px 0 0; }
   .preset {
     display: flex; align-items: baseline; justify-content: space-between; gap: 6px 16px; flex-wrap: wrap;
     border-top: 2px solid var(--hairline); padding-top: 16px; margin-bottom: 12px;
@@ -321,6 +323,12 @@
       <a href="https://lamarzoccousa.com/wp-content/uploads/2023/09/Water-Specifications.pdf">La Marzocco's water spec</a>.
       Slide the targets; the salts recalculate.</p>
   </header>
+
+  <section class="card">
+    <h2 id="espProfilesLabel">Profiles</h2>
+    <div class="chips" role="radiogroup" aria-labelledby="espProfilesLabel" id="espProfileChips"></div>
+    <p class="chip-note" id="espProfileNote"></p>
+  </section>
 
   <section class="card">
     <h2>Targets</h2>
@@ -670,6 +678,84 @@
     'High alkalinity flattens acidity hard — rounder and softer, but fruit-forward coffees can turn dull or chalky.',
   ];
 
+  // mg/L of dissolved ions (NaHCO3 ion mass = dose mass exactly; MgSO4 ions = anhydrous fraction)
+  function ionSumOf(h, a) {
+    return (h / H_FACT) * (MW.mg + MW.so4) / MW.epsom + a / A_FACT;
+  }
+  const bandOf = (h, a) => [tercile((h - 70) / 30), tercile((a - 40) / 40)];
+
+  /* ---------- profile shortcuts ----------
+     One chip per named profile. Each lands on the whole-number point inside
+     that profile's band nearest the band's middle that also keeps the meter
+     TDS inside LM's 150 ppm cap, so picking a chip always shows its name and
+     always passes the spec check. A profile with no such point is shown
+     disabled with the reason, never sent out of spec. */
+  const SHORTCUT_TDS_MAX = 150;   // the same cap the spec check below badges against
+  const SHORTCUTS = [];
+  PROFILE_NAMES.forEach((row, th) => row.forEach((name, ta) => {
+    const ch = 70 + 30 * (th + 0.5) / 3, ca = 40 + 40 * (ta + 0.5) / 3;
+    let best = null;
+    for (let h = 70; h <= 100; h++) for (let a = 40; a <= 80; a++) {
+      const [bh, ba] = bandOf(h, a);
+      if (bh !== th || ba !== ta || ionSumOf(h, a) * 0.7 > SHORTCUT_TDS_MAX) continue;
+      const d = ((h - ch) / 30) ** 2 + ((a - ca) / 40) ** 2;
+      if (!best || d < best.d) best = { h, a, d };
+    }
+    SHORTCUTS.push({ name, th, ta, h: best && best.h, a: best && best.a });
+  }));
+
+  function pickShortcut(sc) {
+    $('hardness').value = sc.h;
+    $('alkalinity').value = sc.a;
+    render();
+  }
+
+  function buildShortcuts() {
+    const host = $('espProfileChips');
+    SHORTCUTS.forEach((sc, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip';
+      b.setAttribute('role', 'radio');
+      b.dataset.i = i;
+      b.textContent = sc.name;
+      if (sc.h === null) {
+        b.setAttribute('aria-disabled', 'true');
+        b.title = 'Not possible inside La Marzocco’s 150 ppm dissolved-solids limit';
+      } else {
+        b.addEventListener('click', () => pickShortcut(sc));
+      }
+      host.appendChild(b);
+    });
+    const blocked = SHORTCUTS.filter(sc => sc.h === null).map(sc => sc.name);
+    $('espProfileNote').textContent = blocked.length
+      ? blocked.join(', ') + ': not possible inside La Marzocco’s 150 ppm dissolved-solids limit.'
+      : '';
+    const usable = [...host.querySelectorAll('.chip:not([aria-disabled="true"])')];
+    host.addEventListener('keydown', e => {
+      const dir = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+      if (!dir) return;
+      e.preventDefault();
+      const at = Math.max(0, usable.indexOf(document.activeElement));
+      const next = usable[(at + dir + usable.length) % usable.length];
+      pickShortcut(SHORTCUTS[+next.dataset.i]);
+      next.focus();
+    });
+  }
+
+  // The chip for whichever profile the sliders sit in is lit, so dragging a
+  // slider shows which profile you've moved into.
+  function paintShortcuts(th, ta) {
+    const chips = [...$('espProfileChips').querySelectorAll('.chip')];
+    chips.forEach(b => {
+      const sc = SHORTCUTS[+b.dataset.i];
+      b.setAttribute('aria-checked', sc.th === th && sc.ta === ta ? 'true' : 'false');
+    });
+    const lit = chips.find(b => b.getAttribute('aria-checked') === 'true' && b.getAttribute('aria-disabled') !== 'true');
+    chips.forEach(b => { b.tabIndex = -1; });
+    (lit || chips.find(b => b.getAttribute('aria-disabled') !== 'true')).tabIndex = 0;
+  }
+
   function render() {
     const h = +$('hardness').value;
     const a = +$('alkalinity').value;
@@ -691,8 +777,8 @@
     $('epsomMl').textContent = (epsomG * 1000 / CONC_A).toFixed(1);
     $('sodaMl').textContent = (sodaG * 1000 / CONC_B).toFixed(1);
 
-    // spec check (NaHCO3 ion mass = dose mass exactly; MgSO4 ions = anhydrous fraction)
-    const ionSum = epsomMgL * (MW.mg + MW.so4) / MW.epsom + sodaMgL;
+    // spec check
+    const ionSum = ionSumOf(h, a);
     const tdsMeter = ionSum * 0.7;
     $('specHardness').textContent = h;
     $('specAlk').textContent = a;
@@ -718,6 +804,7 @@
     const th = tercile(H), ta = tercile(A);
     $('profileName').textContent = PROFILE_NAMES[th][ta];
     $('profileDesc').textContent = HARDNESS_DESC[th] + ' ' + ALK_DESC[ta];
+    paintShortcuts(th, ta);
 
     syncUrl();
     $('shareNote').innerHTML =
@@ -1270,6 +1357,7 @@
   });
 
   ['hardness', 'alkalinity', 'batch'].forEach(id => $(id).addEventListener('input', render));
+  buildShortcuts();
   applyUrl();
   applyPourUrl();
   showTab(tabFromUrl());
